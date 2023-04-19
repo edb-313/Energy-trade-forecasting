@@ -25,11 +25,9 @@ crude_oil <- raw_crude_oil %>%
                names_to = 'Destination country',
                values_to = 'Amount of Crude Oil (Thousand Barrels)')
 
-crude_oil$Date <- as.Date(crude_oil$Date, format = "%m/%d/%Y")
 crude_oil$`Amount of Crude Oil (Thousand Barrels)` <- replace_na(crude_oil$`Amount of Crude Oil (Thousand Barrels)`, 0)
 
 ts_crude_oil <- crude_oil %>% 
-  mutate(Date = yearmonth(Date)) %>% 
   as_tsibble(
     index = Date, 
     key = `Destination country`
