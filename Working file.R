@@ -80,7 +80,28 @@ ts_oil_products <- oil_products %>%
 ################################################################################
 #Reliance on Russian gas
 
+raw_rel_rusoil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/Monthly_Reliance_on_Russian_Oil.csv?", skip = 1)
+
+colnames(raw_rel_rusoil)
+
+rel_rusoil <- raw_rel_rusoil %>% 
+  pivot_longer(cols = -...1,
+               names_to = 'Date',
+               values_to = 'Total Oil Imports from Russia / Total Oil Imports (%)')
+
+rel_rusoil <- rel_rusoil %>% 
+  rename(Country = ...1) %>% 
+  mutate(Date = lubridate::dmy(Date)) %>% 
+  select("Date","Country","Total Oil Imports from Russia / Total Oil Imports (%)")
 
 
+ts_rel_rusoil <- rel_rusoil %>% 
+  as_tsibble(
+    index = Date,
+    key = Country
+  )
 
-
+ts_rel_rusoil %>% 
+  filter(Country == "Lithuania") %>% 
+  head(24) %>% 
+  print(n =24)
