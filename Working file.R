@@ -5,6 +5,9 @@ library(ggplot2)
 library(dplyr)
 library(stringr)
 library(tidyr)
+library(OECD)
+library(tsibble)
+
 
 ################################################################################
 
@@ -13,8 +16,9 @@ library(tidyr)
 
 
 
-raw_crude_oil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/Total%20Crude%20Oil%20Exports%20by%20Destination_EIA.csv?", skip = 2,
+raw_crude_oil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Total%20Crude%20Oil%20Exports%20by%20Destination_EIA.csv?", skip = 2,
                           col_types = cols(Date = col_date(format = "%d/%m/%Y")))
+
 
 #Leaving only country names in column names
 
@@ -53,7 +57,7 @@ ts_crude_oil <- crude_oil %>%
 
 #Total Oil Products Exports by Destination
 
-raw_oil_products <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/Total%20Oil%20Products%20Exports%20by%20Destination_EIA.csv?",  skip = 2,
+raw_oil_products <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Total%20Oil%20Products%20Exports%20by%20Destination_EIA.csv",  skip = 2,
                              col_types = cols(Date = col_date(format = "%d/%m/%Y")))
 
 names(raw_oil_products)[-2] <- str_replace_all(names(raw_oil_products)[-2],
@@ -80,7 +84,7 @@ ts_oil_products <- oil_products %>%
 ################################################################################
 #Reliance on Russian gas
 
-raw_rel_rusoil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/Monthly_Reliance_on_Russian_Oil.csv?", skip = 1)
+raw_rel_rusoil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Monthly_Reliance_on_Russian_Oil.csv", skip = 1)
 
 colnames(raw_rel_rusoil)
 
@@ -98,10 +102,44 @@ rel_rusoil <- rel_rusoil %>%
 ts_rel_rusoil <- rel_rusoil %>% 
   as_tsibble(
     index = Date,
-    key = Country
+    key = Country)
+
+################################################################################
+#Total Natural Gas Exports by Destination
+
+Nat_gas <- read.csv('https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Natural%20Gas%20Exports%20by%20Country_EIA.csv', header=TRUE , check.names=FALSE,skip = 2)
+
+# drop columns 2-3, 6-8, 54 and 57-72
+Nat_gas <- subset(Nat_gas, select = -c(2:3, 6:8,54, 57:72))
+Nat_gas[is.na(Nat_gas)] <- 0
+#cimbining exports to the same countries
+Nat_gas <- Nat_gas %>%
+  mutate(Mexico = `U.S. Natural Gas Pipeline Exports to Mexico (MMcf)` + `Liquefied U.S. Natural Gas Exports by Truck to Mexico (Million Cubic Feet)`,
+         Canada = `U.S. Natural Gas Pipeline Exports to Canada (MMcf)` + `Liquefied U.S. Natural Gas Exports by Truck to Canada (Million Cubic Feet)`)
+#removing duplicate columns
+Nat_gas <- Nat_gas[, !(names(Nat_gas) %in% c('U.S. Natural Gas Pipeline Exports to Mexico (MMcf)',
+                                             'Liquefied U.S. Natural Gas Exports by Truck to Mexico (Million Cubic Feet)',
+                                             'U.S. Natural Gas Pipeline Exports to Canada (MMcf)',
+                                             'Liquefied U.S. Natural Gas Exports by Truck to Canada (Million Cubic Feet)'))]
+
+#cleaning column names
+colnames(Nat_gas) <- gsub(pattern = ".*(to\\s)", "", colnames(Nat_gas))
+colnames(Nat_gas) <- gsub("\\(.*?\\)", "", colnames(Nat_gas))
+
+#pivoting data
+Gastemp <- Nat_gas %>% 
+  pivot_longer(cols = -Date,
+               names_to = 'Destination country',
+               values_to = 'Amount of Natural gas (MMcf)')
+
+Gastemp$Date <- as.Date(Gastemp$Date, format = "%d/%m/%Y")
+
+Gastemp <- Gastemp[complete.cases(Gastemp$Date), ]
+
+#converting to tsibbles
+ts_natgas <- Gastemp %>% 
+  as_tsibble(
+    index = Date, 
+    key = `Destination country`
   )
 
-ts_rel_rusoil %>% 
-  filter(Country == "Lithuania") %>% 
-  head(24) %>% 
-  print(n =24)
