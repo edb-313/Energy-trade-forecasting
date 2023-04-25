@@ -44,17 +44,50 @@ ts_natgas <- Gastemp %>%
     index = Date, 
     key = `Destination country`
   )
-library(ggplot2)
+
+#quarterly overview
+
+ts_quarter<-Gastemp %>% 
+  group_by(year = format(Date, "%Y")) %>% 
+  filter(year >= "2018") %>% filter(year < "2023") %>% 
+  mutate(Quarter = yearquarter(Date)) %>%
+  select(-Date) %>%  
+  group_by(Quarter) %>% 
+  summarise(total_exports = sum(`Amount of Natural gas (MMcf)`)) %>% 
+  as_tsibble(
+    index = Quarter
+  )
+#Seasonal plots
+ts_quarter %>% gg_season(total_exports)+ylab("Total exports")+ggtitle("Seasonal plot: US exports of natural gas")
+#Subseries plots
+ts_quarter %>%
+  gg_subseries(total_exports) + ylab("Total exports")+ggtitle("Subseries plot: US exports of natural gas")
 
 # Aggregate the data by year and sum the amount of natural gas exports
-yearly_data <- ts_natgas %>% 
-  group_by(year = format(Date, "%Y")) %>% 
+Yearly_data_2000 <- ts_natgas %>% 
+  group_by(year = format(Date, "%Y")) %>%  
+  filter(year >= "2000") %>% filter(year < "2023") %>%
   summarise(total_exports = sum(`Amount of Natural gas (MMcf)`))
 
-yearly_data %>% autoplot(total_exports)+ labs(y="Total yearly exports",title= "Total Exports")
-# Plot the time series using ggplot2
-ggplot(yearly_data, aes(x = Date, y = total_exports)) +
-  geom_line() +
-  xlab("Year") +
-  ylab("Total Exports (MMcf)") +
-  ggtitle("Natural Gas Exports Over the Years")+scale_y_continuous(labels = scales::comma_format())
+#Annual time series overview
+
+Yearly_data_2000 %>%
+  autoplot(total_exports) +
+  labs(y = "Total exports of Natural gas",
+       title = "Total exports")
+
+#ACF plot
+library(zoo)
+ts_month <- Gastemp %>% 
+  group_by(year = format(Date, "%Y")) %>% 
+  filter(year >= "1995") %>% filter(year < "2023") %>% 
+  group_by(Date)  %>% mutate(Date = yearmonth(Date)) %>% 
+  summarise(total_exports = sum(`Amount of Natural gas (MMcf)`))  %>% 
+  as_tsibble(
+    index = Date
+  ) 
+ts_month %>%
+  ACF(total_exports) %>%
+  autoplot()
+
+
