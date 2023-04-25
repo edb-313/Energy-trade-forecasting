@@ -13,8 +13,9 @@ library(tidyr)
 
 
 
-raw_crude_oil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/Total%20Crude%20Oil%20Exports%20by%20Destination_EIA.csv?", skip = 2,
+raw_crude_oil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Total%20Crude%20Oil%20Exports%20by%20Destination_EIA.csv?", skip = 2,
                           col_types = cols(Date = col_date(format = "%d/%m/%Y")))
+
 
 #Leaving only country names in column names
 
@@ -53,7 +54,7 @@ ts_crude_oil <- crude_oil %>%
 
 #Total Oil Products Exports by Destination
 
-raw_oil_products <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/Total%20Oil%20Products%20Exports%20by%20Destination_EIA.csv?",  skip = 2,
+raw_oil_products <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Total%20Oil%20Products%20Exports%20by%20Destination_EIA.csv",  skip = 2,
                              col_types = cols(Date = col_date(format = "%d/%m/%Y")))
 
 names(raw_oil_products)[-2] <- str_replace_all(names(raw_oil_products)[-2],
@@ -80,7 +81,7 @@ ts_oil_products <- oil_products %>%
 ################################################################################
 #Reliance on Russian gas
 
-raw_rel_rusoil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/Monthly_Reliance_on_Russian_Oil.csv?", skip = 1)
+raw_rel_rusoil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Monthly_Reliance_on_Russian_Oil.csv", skip = 1)
 
 colnames(raw_rel_rusoil)
 
@@ -98,10 +99,9 @@ rel_rusoil <- rel_rusoil %>%
 ts_rel_rusoil <- rel_rusoil %>% 
   as_tsibble(
     index = Date,
-    key = Country
-  )
+    key = Country) %>% 
 
 ts_rel_rusoil %>% 
-  filter(Country == "Lithuania") %>% 
+  filter(Country == "Lithuania", "Germany") %>% 
   head(24) %>% 
   print(n =24)
