@@ -36,8 +36,6 @@ Gastemp <- Nat_gas %>%
 
 Gastemp$Date <- as.Date(Gastemp$Date, format = "%d/%m/%Y")
 
-sum(is.na(Gastemp$Date))
-
 Gastemp <- Gastemp[complete.cases(Gastemp$Date), ]
 
 #converting to tsibbles
@@ -46,3 +44,17 @@ ts_natgas <- Gastemp %>%
     index = Date, 
     key = `Destination country`
   )
+library(ggplot2)
+
+# Aggregate the data by year and sum the amount of natural gas exports
+yearly_data <- ts_natgas %>% 
+  group_by(year = format(Date, "%Y")) %>% 
+  summarise(total_exports = sum(`Amount of Natural gas (MMcf)`))
+
+yearly_data %>% autoplot(total_exports)+ labs(y="Total yearly exports",title= "Total Exports")
+# Plot the time series using ggplot2
+ggplot(yearly_data, aes(x = Date, y = total_exports)) +
+  geom_line() +
+  xlab("Year") +
+  ylab("Total Exports (MMcf)") +
+  ggtitle("Natural Gas Exports Over the Years")+scale_y_continuous(labels = scales::comma_format())
