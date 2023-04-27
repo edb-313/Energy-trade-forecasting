@@ -1,4 +1,23 @@
-#filtering out only needed data
+#OECD Countries
+
+oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
+                 "Finland", "France", "Germany", "Greece", "Hungary", "Iceland",
+                 "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg",
+                 "Netherlands", "Norway", "Poland", "Portugal", "Slovak Republic",
+                 "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey",
+                 "United Kingdom")
+
+
+
+check <- ts_crude_oil %>%
+  filter(Quarter >= yearquarter("2010 Q1") & Quarter < yearquarter("2023 Q1")) %>% 
+  filter(`Destination country` %in% oecd_europe) 
+  
+check2 <- crude_oil %>% 
+  filter(`Destination country` == "Italy")
+
+
+#filtering out total data
 
 total_quarterly <- ts_crude_oil %>%
   mutate(Quarter = yearquarter(Date)) %>%
@@ -6,6 +25,18 @@ total_quarterly <- ts_crude_oil %>%
   filter(Quarter >= yearquarter("2000 Q1") & Quarter < yearquarter("2023 Q1")) %>%
   group_by(Quarter) %>%
   summarise(`Amount of Crude Oil` = sum(`Amount of Crude Oil (Thousand Barrels)`))
+
+
+#filtering out OECD Europe data
+
+oecd_quarterly <- ts_crude_oil %>%
+  mutate(Quarter = yearquarter(Date)) %>%
+  filter(`Destination country` == "Netherlands" & `Destination country` == "United Kingdom") %>%
+  filter(Quarter >= yearquarter("2000 Q1") & Quarter < yearquarter("2023 Q1")) %>%
+  group_by(Quarter) %>%
+  summarise(`Amount of Crude Oil` = sum(`Amount of Crude Oil (Thousand Barrels)`))
+
+
 
 #creating a tsibble
 
