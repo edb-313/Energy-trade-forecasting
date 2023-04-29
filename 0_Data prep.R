@@ -49,7 +49,8 @@ crude_oil$`Amount of Crude Oil (Thousand Barrels)` <- replace_na(crude_oil$`Amou
 
 #Setting up the tsibble
 
-ts_crude_oil <- crude_oil %>% 
+ts_crude_oil <- crude_oil %>%
+  mutate(Date = yearmonth(Date)) %>% 
   as_tsibble(
     index = Date, 
     key = `Destination country`
@@ -66,9 +67,9 @@ oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
 
 #filtering out only relevant values
 
-oecd_crude_oil <- ts_crude_oil %>% 
+oecd_crude_oil <- ts_crude_oil %>%
   filter(`Destination country` %in% oecd_europe) %>% 
-  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
+  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15")) 
 
 oecd_crude_oil
   
@@ -77,33 +78,35 @@ oecd_crude_oil
 
 #Total Oil Products Exports by Destination
 
-raw_oil_products <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Total%20Oil%20Products%20Exports%20by%20Destination_EIA.csv",  skip = 2,)
+raw_oil_prod <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Total%20Oil%20Products%20Exports%20by%20Destination_EIA.csv",  skip = 2,)
 
-names(raw_oil_products)[-2] <- str_replace_all(names(raw_oil_products)[-2],
+names(raw_oil_prod)[-2] <- str_replace_all(names(raw_oil_prod)[-2],
                                            c("U.S. Exports to " = "",
                                              " of Total Petroleum Products \\(Thousand Barrels\\)" = ""))
-oil_products <- raw_oil_products %>% 
+oil_prod <- raw_oil_prod %>% 
   pivot_longer(cols = -Date,
                names_to = 'Destination country',
                values_to = 'Amount of total Petroleum Porducts (Thousand Barrels)')
 
 
-oil_products$`Amount of total Petroleum Porducts (Thousand Barrels)` <- replace_na(oil_products$`Amount of total Petroleum Porducts (Thousand Barrels)`, 0)
+oil_prod$`Amount of total Petroleum Porducts (Thousand Barrels)` <- replace_na(oil_prod$`Amount of total Petroleum Porducts (Thousand Barrels)`, 0)
 
-oil_products <- oil_products %>% 
+oil_prod <- oil_prod %>% 
   drop_na(Date) %>% 
   mutate(Date = as.Date(Date))
 
-ts_oil_products <- oil_products %>% 
+ts_oil_prod <- oil_prod %>%
+  mutate(Date = yearmonth(Date)) %>% 
   as_tsibble(
     index = Date, 
     key = `Destination country`
   )
 
-oecd_oil_products <- ts_oil_products %>% 
+oecd_oil_prod <- ts_oil_prod %>% 
   filter(`Destination country` %in% oecd_europe) %>% 
   filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
 
+oecd_oil_prod
 
 ################################################################################
 #Reliance on Russian gas
@@ -186,6 +189,7 @@ gastemp <- gastemp %>%
 #creating a tsibble
 
 ts_nat_gas <- gastemp %>%
+  mutate(Date = yearmonth(Date)) %>% 
   as_tsibble(
     index = Date,
     key = `Destination country`

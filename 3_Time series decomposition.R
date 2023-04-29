@@ -57,53 +57,53 @@ components(dcmp_oecd_crude_oil) %>% gg_subseries(season_year)
 
 #ploting the data
 
-oecd_oil_products_agg <- oecd_oil_products %>%
+oecd_oil_prod_agg <- oecd_oil_prod %>%
   index_by(Date) %>%
   summarize_at(vars(`Amount of total Petroleum Porducts (Thousand Barrels)`), sum) %>%
   ungroup()
 
-oecd_oil_products_agg
+oecd_oil_prod_agg
 
-oecd_oil_products_agg <- oecd_oil_products_agg %>%
+oecd_oil_prod_agg <- oecd_oil_prod_agg %>%
   mutate(Date = yearmonth(Date))
 
 
-oecd_oil_products_agg %>% 
+oecd_oil_prod_agg %>% 
   autoplot(`Amount of total Petroleum Porducts (Thousand Barrels)`)
 
 
 #finding lambda for box cox transformation
 
-oecd_oil_products_agg %>% features(`Amount of total Petroleum Porducts (Thousand Barrels)`, features = guerrero)
+oecd_oil_prod_agg %>% features(`Amount of total Petroleum Porducts (Thousand Barrels)`, features = guerrero)
 
 #box cox transformation
 
-oecd_oil_products_agg %>% autoplot(box_cox(`Amount of total Petroleum Porducts (Thousand Barrels)`, 0.73)) +
+oecd_oil_prod_agg %>% autoplot(box_cox(`Amount of total Petroleum Porducts (Thousand Barrels)`, 0.73)) +
   labs(y = "Box-Cox transformed exportamounts")
 
 #decomposition
 
-dcmp_oecd_oil_products <- oecd_oil_products_agg %>%
+dcmp_oecd_oil_prod <- oecd_oil_prod_agg %>%
   model(stl = STL(`Amount of total Petroleum Porducts (Thousand Barrels)`))
 
 
-components(dcmp_oecd_oil_products)
+components(dcmp_oecd_oil_prod)
 
 #ploting the components
 
-components(dcmp_oecd_oil_products) %>% autoplot()
+components(dcmp_oecd_oil_prod) %>% autoplot()
 
 #trend component against all components
 
-oecd_oil_products_agg %>%
+oecd_oil_prod_agg %>%
   autoplot(`Amount of total Petroleum Porducts (Thousand Barrels)`, color='gray') +
-  autolayer(components(dcmp_oecd_oil_products), trend, color='red') +
+  autolayer(components(dcmp_oecd_oil_prod), trend, color='red') +
   xlab("Year") + ylab("Barels thousands") +
   ggtitle("U.S. Exports of Petroleum Porducts to OECD Europe (Thousand Barrels)")
 
 #seasonal oomponent
 
-components(dcmp_oecd_oil_products) %>% gg_subseries(season_year)
+components(dcmp_oecd_oil_prod) %>% gg_subseries(season_year)
 
 ########### Natural Gas Exports #######################################################
 
