@@ -1,81 +1,159 @@
-#OECD Countries
+#Time series decomposition 
 
-oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
-                 "Finland", "France", "Germany", "Greece", "Hungary", "Iceland",
-                 "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg",
-                 "Netherlands", "Norway", "Poland", "Portugal", "Slovak Republic",
-                 "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey",
-                 "United Kingdom")
-
-
-
-check <- ts_crude_oil %>%
-  filter(Quarter >= yearquarter("2010 Q1") & Quarter < yearquarter("2023 Q1")) %>% 
-  filter(`Destination country` %in% oecd_europe) 
-  
-check2 <- crude_oil %>% 
-  filter(`Destination country` == "Italy")
-
-
-#filtering out total data
-
-total_quarterly <- ts_crude_oil %>%
-  mutate(Quarter = yearquarter(Date)) %>%
-  filter(`Destination country` == "U.S. Exports of Crude Oil (Thousand Barrels)") %>%
-  filter(Quarter >= yearquarter("2000 Q1") & Quarter < yearquarter("2023 Q1")) %>%
-  group_by(Quarter) %>%
-  summarise(`Amount of Crude Oil` = sum(`Amount of Crude Oil (Thousand Barrels)`))
-
-
-#filtering out OECD Europe data
-
-oecd_quarterly <- ts_crude_oil %>%
-  mutate(Quarter = yearquarter(Date)) %>%
-  filter(`Destination country` == "Netherlands" & `Destination country` == "United Kingdom") %>%
-  filter(Quarter >= yearquarter("2000 Q1") & Quarter < yearquarter("2023 Q1")) %>%
-  group_by(Quarter) %>%
-  summarise(`Amount of Crude Oil` = sum(`Amount of Crude Oil (Thousand Barrels)`))
-
-
-
-#creating a tsibble
-
-ts_total_quarterly <-total_quarterly %>%
-  as_tsibble(
-  index = Quarter
-)
+########### Crude Oil Exports ##################################################################
 
 #ploting the data
 
-ts_total_quarterly %>% autoplot(`Amount of Crude Oil`)
+oecd_crude_oil_agg <- oecd_crude_oil %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of Crude Oil (Thousand Barrels)`), sum) %>%
+  ungroup()
+
+oecd_crude_oil_agg
+
+oecd_crude_oil_agg <- oecd_crude_oil_agg %>%
+  mutate(Date = yearmonth(Date))
+         
+
+oecd_crude_oil_agg %>% 
+  autoplot(`Amount of Crude Oil (Thousand Barrels)`)
+
 
 #finding lambda for box cox transformation
 
-ts_total_quarterly %>% features(`Amount of Crude Oil`, features = guerrero)
+oecd_crude_oil_agg %>% features(`Amount of Crude Oil (Thousand Barrels)`, features = guerrero)
 
 #box cox transformation
 
-ts_total_quarterly %>% autoplot(box_cox(`Amount of Crude Oil`, 0.316)) +
+oecd_crude_oil_agg %>% autoplot(box_cox(`Amount of Crude Oil (Thousand Barrels)`, 1.13)) +
   labs(y = "Box-Cox transformed exportamounts")
 
 #decomposition
 
-dcmp_total_quarterly <- ts_total_quarterly %>%
-  model(stl = STL(`Amount of Crude Oil`))
-components(dcmp_total_quarterly)
+dcmp_oecd_crude_oil <- oecd_crude_oil_agg %>%
+  model(stl = STL(`Amount of Crude Oil (Thousand Barrels)`))
+
+
+components(dcmp_oecd_crude_oil)
 
 #ploting the components
 
-components(dcmp_total_quarterly) %>% autoplot()
+components(dcmp_oecd_crude_oil) %>% autoplot()
 
 #trend component against all components
 
-ts_total_quarterly %>%
-  autoplot(`Amount of Crude Oil`, color='gray') +
-  autolayer(components(dcmp_total_quarterly), trend, color='red') +
+oecd_crude_oil_agg %>%
+  autoplot(`Amount of Crude Oil (Thousand Barrels)`, color='gray') +
+  autolayer(components(dcmp_oecd_crude_oil), trend, color='red') +
   xlab("Year") + ylab("Barels thousands") +
-  ggtitle("U.S. Exports of Crude Oil (Thousand Barrels)")
+  ggtitle("U.S. Exports of Crude Oil to OECD Europe (Thousand Barrels)")
 
-#
+#seasonal oomponent
 
-components(dcmp_total_quarterly) %>% gg_subseries(season_)
+components(dcmp_oecd_crude_oil) %>% gg_subseries(season_year)
+
+
+###########  Oil Products Exports #######################################################
+
+#ploting the data
+
+oecd_oil_products_agg <- oecd_oil_products %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of total Petroleum Porducts (Thousand Barrels)`), sum) %>%
+  ungroup()
+
+oecd_oil_products_agg
+
+oecd_oil_products_agg <- oecd_oil_products_agg %>%
+  mutate(Date = yearmonth(Date))
+
+
+oecd_oil_products_agg %>% 
+  autoplot(`Amount of total Petroleum Porducts (Thousand Barrels)`)
+
+
+#finding lambda for box cox transformation
+
+oecd_oil_products_agg %>% features(`Amount of total Petroleum Porducts (Thousand Barrels)`, features = guerrero)
+
+#box cox transformation
+
+oecd_oil_products_agg %>% autoplot(box_cox(`Amount of total Petroleum Porducts (Thousand Barrels)`, 0.73)) +
+  labs(y = "Box-Cox transformed exportamounts")
+
+#decomposition
+
+dcmp_oecd_oil_products <- oecd_oil_products_agg %>%
+  model(stl = STL(`Amount of total Petroleum Porducts (Thousand Barrels)`))
+
+
+components(dcmp_oecd_oil_products)
+
+#ploting the components
+
+components(dcmp_oecd_oil_products) %>% autoplot()
+
+#trend component against all components
+
+oecd_oil_products_agg %>%
+  autoplot(`Amount of total Petroleum Porducts (Thousand Barrels)`, color='gray') +
+  autolayer(components(dcmp_oecd_oil_products), trend, color='red') +
+  xlab("Year") + ylab("Barels thousands") +
+  ggtitle("U.S. Exports of Petroleum Porducts to OECD Europe (Thousand Barrels)")
+
+#seasonal oomponent
+
+components(dcmp_oecd_oil_products) %>% gg_subseries(season_year)
+
+########### Natural Gas Exports #######################################################
+
+
+#ploting the data
+
+oecd_nat_gas_agg <- oecd_nat_gas %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of Natural gas (MMcf)`), sum) %>%
+  ungroup()
+
+oecd_nat_gas_agg
+
+oecd_nat_gas_agg <- oecd_nat_gas_agg %>%
+  mutate(Date = yearmonth(Date))
+
+
+oecd_nat_gas_agg %>% 
+  autoplot(`Amount of Natural gas (MMcf)`)
+
+
+#finding lambda for box cox transformation
+
+oecd_nat_gas_agg %>% features(`Amount of Natural gas (MMcf)`, features = guerrero)
+
+#box cox transformation
+
+oecd_nat_gas_agg %>% autoplot(box_cox(`Amount of Natural gas (MMcf)`, 0.390)) +
+  labs(y = "Box-Cox transformed exportamounts")
+
+#decomposition
+
+dcmp_oecd_nat_gas <- oecd_nat_gas_agg %>%
+  model(stl = STL(`Amount of Natural gas (MMcf)`))
+
+
+components(dcmp_oecd_nat_gas)
+
+#ploting the components
+
+components(dcmp_oecd_nat_gas) %>% autoplot()
+
+#trend component against all components
+
+oecd_nat_gas_agg %>%
+  autoplot(`Amount of Natural gas (MMcf)`, color='gray') +
+  autolayer(components(dcmp_oecd_nat_gas), trend, color='red') +
+  xlab("Year") + ylab("Amount of Natural Gas (MMcf") +
+  ggtitle("U.S. Exports of Natural Gas to OECD Europe (MMcf)")
+
+#seasonal oomponent
+
+components(dcmp_oecd_nat_gas) %>% gg_subseries(season_year)
