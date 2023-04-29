@@ -11,6 +11,8 @@ library(tsibble)
 library(lubridate)
 library(zoo)
 library(readr)
+library(ggfortify)
+
 ################################################################################
 
 #Total Crude Oil Exports by Destination
@@ -33,6 +35,7 @@ crude_oil <- raw_crude_oil %>%
                values_to = 'Amount of Crude Oil (Thousand Barrels)')
 
 
+
 #Filtering out values where Date is 'NA'
 
 crude_oil <- crude_oil %>%
@@ -51,6 +54,24 @@ ts_crude_oil <- crude_oil %>%
     index = Date, 
     key = `Destination country`
   )
+
+#OECD Europe Countries vector
+
+oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
+                 "Finland", "France", "Germany", "Greece", "Hungary", "Iceland",
+                 "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg",
+                 "Netherlands", "Norway", "Poland", "Portugal", "Slovak Republic",
+                 "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey",
+                 "United Kingdom")
+
+#filtering out only relevant values
+
+ts_crude_oil <- ts_crude_oil %>% 
+  filter(`Destination country` %in% oecd_europe) %>% 
+  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
+
+ts_crude_oil
+  
 
 ################################################################################
 
@@ -78,6 +99,10 @@ ts_oil_products <- oil_products %>%
     index = Date, 
     key = `Destination country`
   )
+
+ts_oil_products <- ts_oil_products %>% 
+  filter(`Destination country` %in% oecd_europe) %>% 
+  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
 
 ################################################################################
 #Reliance on Russian gas
@@ -135,14 +160,38 @@ gastemp <- nat_gas %>%
                names_to = 'Destination country',
                values_to = 'Amount of Natural gas (MMcf)')
 
-gastemp$Date <- as.Date(gastemp$Date, format = "%d/%m/%Y")
-
-gastemp <- gastemp[complete.cases(gastemp$Date), ]
-
 #converting to tsibbles
-ts_natgas <- gastemp %>% 
+
+gastemp
+
+#removing n/as in date column, fixing date formatting, fixing values (romoving space in the end)
+
+gastemp <- gastemp %>% 
+  drop_na(Date) %>% 
+  mutate(Date = as.Date(Date)) %>% 
+  mutate(`Destination country` = str_trim(`Destination country`))
+
+#identifying duplicate values 
+
+duplicates(gastemp, index = "Date", key = "Destination country")
+
+#summing duplicates 
+
+gastemp <- gastemp %>%
+  group_by(Date, `Destination country`) %>%
+  summarize_at(vars(`Amount of Natural gas (MMcf)`), sum) %>%
+  ungroup()
+
+#creating a tsibble
+
+ts_nat_gas <- gastemp %>%
   as_tsibble(
-    index = Date, 
+    index = Date,
     key = `Destination country`
   )
 
+#filtering only relevant data
+
+ts_nat_gas <- ts_nat_gas %>%
+  filter(`Destination country` %in% oecd_europe) %>% 
+  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
