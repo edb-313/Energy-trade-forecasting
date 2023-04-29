@@ -66,11 +66,11 @@ oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
 
 #filtering out only relevant values
 
-ts_crude_oil <- ts_crude_oil %>% 
+oecd_crude_oil <- ts_crude_oil %>% 
   filter(`Destination country` %in% oecd_europe) %>% 
   filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
 
-ts_crude_oil
+oecd_crude_oil
   
 
 ################################################################################
@@ -100,9 +100,10 @@ ts_oil_products <- oil_products %>%
     key = `Destination country`
   )
 
-ts_oil_products <- ts_oil_products %>% 
+oecd_oil_products <- ts_oil_products %>% 
   filter(`Destination country` %in% oecd_europe) %>% 
   filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
+
 
 ################################################################################
 #Reliance on Russian gas
@@ -192,6 +193,6 @@ ts_nat_gas <- gastemp %>%
 
 #filtering only relevant data
 
-ts_nat_gas <- ts_nat_gas %>%
+oecd_nat_gas <- ts_nat_gas %>%
   filter(`Destination country` %in% oecd_europe) %>% 
   filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
