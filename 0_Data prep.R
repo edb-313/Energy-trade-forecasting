@@ -1,18 +1,11 @@
 library(fpp3)
 library(tidyverse)
-library(readxl)
-library(httr)
 library(ggplot2)
 library(dplyr)
 library(stringr)
 library(tidyr)
-library(OECD)
-library(tsibble)
 library(lubridate)
 library(zoo)
-library(readr)
-library(ggfortify)
-
 ################################################################################
 
 #Total Crude Oil Exports by Destination
