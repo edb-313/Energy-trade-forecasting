@@ -2,10 +2,8 @@ library(fpp3)
 library(tidyverse)
 library(ggplot2)
 library(dplyr)
-library(stringr)
 library(tidyr)
 library(lubridate)
-library(zoo)
 ################################################################################
 
 #Total Crude Oil Exports by Destination
@@ -162,6 +160,7 @@ gastemp <- nat_gas %>%
 gastemp
 
 #removing n/as in date column, fixing date formatting, fixing values (romoving space in the end)
+library(stringr) #for triming the strings
 
 gastemp <- gastemp %>% 
   drop_na(Date) %>% 
