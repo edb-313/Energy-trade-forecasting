@@ -34,7 +34,6 @@ crude_oil_fc %>%
   guides(colour = guide_legend(title = "Forecast"))
   
 
-
 ########################### Oil Porducts Exports ################################
 
 

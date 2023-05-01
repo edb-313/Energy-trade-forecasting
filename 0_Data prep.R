@@ -122,6 +122,11 @@ ts_rel_rusoil <- rel_rusoil %>%
     index = Date,
     key = Country)
 
+oecd_relrus <- ts_rel_rusoil %>%
+  filter(Country %in% oecd_europe)
+
+oecd_relrus %>% slice_sample(n=10)
+
 ################################################################################
 #Total Natural Gas Exports by Destination
 
@@ -176,7 +181,8 @@ duplicates(gastemp, index = "Date", key = "Destination country")
 gastemp <- gastemp %>%
   group_by(Date, `Destination country`) %>%
   summarize_at(vars(`Amount of Natural gas (MMcf)`), sum) %>%
-  ungroup()
+  ungroup() %>% 
+  drop_na(Date)
 
 #creating a tsibble
 
