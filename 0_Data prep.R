@@ -47,6 +47,8 @@ ts_crude_oil <- crude_oil %>%
     key = `Destination country`
   )
 
+
+
 #OECD Europe Countries vector
 
 oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
@@ -60,10 +62,15 @@ oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
 
 oecd_crude_oil <- ts_crude_oil %>%
   filter(`Destination country` %in% oecd_europe) %>% 
-  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15")) 
+  filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15")) 
 
 oecd_crude_oil
   
+oecd_crude_oil_agg <- oecd_crude_oil %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of Crude Oil (Thousand Barrels)`), sum) %>%
+  ungroup()
+
 
 ################################################################################
 
@@ -98,6 +105,11 @@ oecd_oil_prod <- ts_oil_prod %>%
   filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15"))
 
 oecd_oil_prod
+
+oecd_oil_prod_agg <- oecd_oil_prod %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of total Petroleum Porducts (Thousand Barrels)`), sum) %>%
+  ungroup()
 
 ################################################################################
 #Reliance on Russian gas
@@ -199,7 +211,35 @@ oecd_nat_gas <- ts_nat_gas %>%
   filter(`Destination country` %in% oecd_europe) %>% 
   filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15"))
 
+
+
 oecd_nat_gas_agg <- oecd_nat_gas %>%
   index_by(Date) %>%
   summarize_at(vars(`Amount of Natural gas (MMcf)`), sum) %>%
   ungroup()
+
+oecd_nat_gas_agg <- oecd_nat_gas_agg %>% 
+  mutate(`Amount of Natural gas (BOE)` = `Amount of Natural gas (MMcf)` * 1000 / 6000 )
+
+oecd_nat_gas_agg <- oecd_nat_gas_agg %>% 
+  select(Date, `Amount of Natural gas (BOE)`)
+
+oecd_nat_gas_agg
+
+################################################################################
+
+oecd_merged <- left_join(oecd_nat_gas_agg, oecd_oil_prod_agg, by = "Date") %>%
+  left_join(oecd_crude_oil_agg, by = "Date")
+
+total_exp_oecd <- oecd_merged %>%
+  pivot_longer(cols = -Date, names_to = "Export Type", values_to = "Amount")
+
+
+total_exp_oecd %>% ggplot(
+ aes(Date,Amount,color = `Export Type`)) +
+   geom_line()+
+   labs(x = "Date", y = "Amount")+
+  theme(legend.position = "bottom")
+
+
+
