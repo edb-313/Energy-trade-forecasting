@@ -108,7 +108,7 @@ oecd_nat_gas %>%
 
 
 
-#ACF plot
+#ACF plot without lag
 
 oecd_nat_gas %>%
   index_by(Date) %>% 
