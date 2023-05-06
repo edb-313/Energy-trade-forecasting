@@ -95,7 +95,7 @@ ts_oil_prod <- oil_prod %>%
 
 oecd_oil_prod <- ts_oil_prod %>% 
   filter(`Destination country` %in% oecd_europe) %>% 
-  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
+  filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15"))
 
 oecd_oil_prod
 
@@ -197,4 +197,9 @@ ts_nat_gas <- gastemp %>%
 
 oecd_nat_gas <- ts_nat_gas %>%
   filter(`Destination country` %in% oecd_europe) %>% 
-  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
+  filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15"))
+
+oecd_nat_gas_agg <- oecd_nat_gas %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of Natural gas (MMcf)`), sum) %>%
+  ungroup()
