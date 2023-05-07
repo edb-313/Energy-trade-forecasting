@@ -12,39 +12,29 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ### Introduction 
 
-Energy commodities play a vital role in the global economy as they are an essential ingredient for economic growth and development. Energy, among others, is required for transportation, manufacturing, heating, and cooling, and many other critical activities that drive economic activity. 
+Energy commodities play a pivotal role in the global economy, as they are essential for economic growth and development. They are required for transportation, manufacturing, heating, cooling, and many other critical activities that drive economic activity. 
 
-The production, consumption, and trade of energy commodities also have significant impacts on the global economy. The prices of energy commodities are influenced by supply and demand factors, as well as geopolitical tensions, weather events, and technological advances. 
+The production, consumption, and trade of energy commodities have significant impacts on the global economy. The prices of energy commodities are influenced by supply and demand factors, geopolitical tensions, weather events, and technological advances.
 
-Lately, society has faced two significant challenges: firstly, the COVID-19 pandemic, and secondly, the war in Ukraine. These have created unprecedented changes in the energy market, and understanding the impact of these events is crucial for policymakers, analysts, and investors. 
+The recent COVID-19 pandemic and the war in Ukraine have created unprecedented changes in the energy market, and understanding the impact of these events is crucial for policymakers, analysts, and investors. This study aims to examine how the Russian war on Ukraine affected energy exports of the United States to the OECD Europe countries. 
 
-The objective of this study is to examine the time-series data on energy commodity exports from the United States in the energy market. The United States has been chosen because it is one of the leading producers and exporters of energy commodities, and its export trends have significant implications for the global energy market. Also, the United States serves as a significant alternative for EU countries to turn to after the EU's imposition of sanctions on Russia. 
+OECD Europe was selected as the region, as because of geographical and historical relations it was most influenced region by the Russian war on Ukraine. The United States has been chosen as the focus because it is one of the leading producers and exporters of energy commodities, and its export trends have significant implications for the global energy market. Moreover, the United States serves as a significant alternative for OECD Europe countries to turn to after the imposition of sanctions on Russia.
 
-Moreover, the main goals of this study are to: 
+In this study, we will analyze the impact of the war in Ukraine on US energy exports to OECD Europe. Specifically, we will focus on three main energy products: crude oil, petroleum products, and natural gas. By examining trends in these exports, we can better understand how the geopolitical events in Ukraine have affected the energy market in Europe. Additionally, we will investigate changes in OECD Europe's dependence on Russian gas to see how energy dynamics in the region have shifted. 
 
-* Identify the main patterns and trends in the selected series, including any seasonality, cyclicity, or trends, and determine if any series are white noise. 
+  
 
-* Use time series decomposition methods to identify the effects of different components, such as trend, seasonality, and residual, on the series and determine if any adjustments or transformations are needed. 
-
-* Apply different forecasting methods, including simple forecasting methods, exponential smoothing, and ARIMA models, to forecast future values of the selected series and evaluate the accuracy of these methods. 
-
-* Explore other forecasting methods not covered in class, such as dynamic regression models, Prophet model, and Neural Network Autoregression, to compare their performance with the methods covered in class. 
-
-The data sets utilized in this study consist of monthly observations of Country’s reliance on Russian oil products, USA’s natural gas exports by country, USA’s total crude oil exports by destination, and USA’s petroleum products exports by destination.  
-
-Four fallowing tsibbles were compiled out of four data sets:
-
-* Country’s reliance on Russian oil products (Monthly)
+### Data preparation and overview
 
 
-## Data preparation and overview
-
-Every data set was
+The data sets utilized in this study consist of monthly observations of Country’s reliance on Russian oil products, USA’s natural gas exports by country, USA’s total crude oil exports by destination, and USA’s petroleum products exports by destination.
 
 
 Our primary source of data is the U.S. Energy Information Administration (EIA), an independent organization that collects, analyzes, and disseminates data and information related to energy production, consumption, and distribution in the United States. Also, for the purpose of this study we are using data from the International Energy Agency (IEA), which  is an intergovernmental organization that was established in 1974 to promote global cooperation on energy issues. 
 
 In case of data on reliance on Russian Oil the dataset contains monthly total oil imports from Russia as a percentage of total oil imports for a selected group of European countries belonging to the Organization for Economic Co-operation and Development (OECD) from January 1990 to October 2022. The dataset includes the date, country name, and the percentage of total oil imports that came from Russia for each observation. 
+
+
 
 ```{r, Reliance on Russian oil_tsibble example, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
 
@@ -256,13 +246,72 @@ oecd_nat_gas %>% slice_sample(n=10)
 **Placeholder for methodologies**
 
 
-## 2. Time series graphics
+### 2. Time series graphics
 
 Done
 
-## 3. Time series decomposition
+### 3. Time series decomposition
 
-WIP
+#### 3.1. Adjustments
+
+After a thorough review of the data, we determined that no adjustments were necessary. We did not observe any calendar or population effects on the monthly exports data, and the exports data is already presented in barrels or barrels of oil equivalent (BOE), so no inflation adjustments were required.
+
+#### 3.2. Transformations
+
+Given the nature of the three data sets that are being used: Crude Oil Exports, Petroleum exports and Natural gas exports we decided that certain transformations might be necessary. Not normal distribution of the data and differing variance were seen as potential threat for correct conclusions. We identified Box-Cox transformation as necessary to continue since it stabilizes the variance of the data and makes the distribution more normal. This will  improve the reliability of the statistical tests and provide more accurate results. 
+
+For Box-Cox transformation to be performed we found lambda for each time series and than use it to transform the time series. 
+
+
+oecd_crude_oil_agg <- oecd_crude_oil %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of Crude Oil (Thousand Barrels)`), sum) %>%
+  ungroup()
+
+oecd_oil_prod_agg <- oecd_oil_prod %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of total Petroleum Porducts (Thousand Barrels)`), sum) %>%
+  ungroup()
+
+oecd_nat_gas_agg <- oecd_nat_gas %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of Natural gas (MMcf)`), sum) %>%
+  ungroup()
+
+
+oecd_crude_oil_agg %>% features(`Amount of Crude Oil (Thousand Barrels)`, features = guerrero)
+oecd_crude_oil_agg <- box_cox(oecd_crude_oil_agg$`Amount of Crude Oil (Thousand Barrels)`, 0.28)
+
+oecd_oil_prod_agg %>% features(`Amount of total Petroleum Porducts (Thousand Barrels)`, features = guerrero)
+oecd_oil_prod_agg  <- box_cox(oecd_oil_prod_agg$`Amount of total Petroleum Porducts (Thousand Barrels)`, 0.907)
+
+oecd_nat_gas_agg %>% features(oecd_nat_gas_agg$`Amount of Natural gas (BOE)`, features = guerrero)
+oecd_nat_gas_agg <- box_cox(oecd_nat_gas_agg$`Amount of Natural gas (MMcf)`, 1.13)
+
+```
+
+
+```
+#### 3.3. Decomposition
+
+STL Decomposition
+
+```{r, decomposition, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
+
+dcmp_oecd_nat_gas <- oecd_nat_gas_agg %>%
+  model(stl = STL(`Amount of Natural gas (MMcf)`))
+
+
+components(dcmp_oecd_nat_gas)
+```
+
+
+```{r}
+
+```
+
+
+
 
 ## 4. The forecaster’s toolbox
 
