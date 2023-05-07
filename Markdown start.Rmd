@@ -24,6 +24,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(lubridate)
+library(scales)
 ################################################################################
 
 #Total Crude Oil Exports by Destination
@@ -284,7 +285,6 @@ Finally, looking at petroleum product exports, we can see some fluctuations sinc
 
 
 
-
 ```{Overview by product}
 total_exp_oecd %>%  
   ggplot(aes(Date, Amount, color = `Export Type`)) +
@@ -293,4 +293,113 @@ total_exp_oecd %>%
   theme(legend.position = "bottom") +
   facet_wrap(~`Export Type`, ncol = 1)
 ```
+2.3 Time Series Patterns
 
+```{Seasonal plot for each product}
+# create seasonal plot of total exports monthly of Natural gas
+total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(`Amount`)) %>% 
+  gg_season(Total_Exports) +
+  ylab("Total exports  of Natural Gas") +
+  ggtitle("Seasonal plot: US exports of natural gas to OECD") +
+  scale_y_continuous(labels = comma_format())
+
+# create seasonal plot of total exports monthly of Crude oil
+total_exp_oecd %>% filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(`Amount`)) %>% 
+  gg_season(Total_Exports) +
+  ylab("Total exports  of Crude oil") +
+  ggtitle("Seasonal plot: US exports of Crude Oil to OECD") +
+  scale_y_continuous(labels = comma_format())
+
+# create seasonal plot of total exports monthly of Petroleum products
+total_exp_oecd %>% filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(`Amount`)) %>% 
+  gg_season(Total_Exports) +
+  ylab("Total exports  of Petroleum Products") +
+  ggtitle("Seasonal plot: US exports of Petroleum to OECD") +
+  scale_y_continuous(labels = comma_format())
+```
+
+To further elaborate, the data analysis of US exports of oil products to OECD shows that seasonal patterns can differ depending on the type of product being exported. While natural gas and crude oil both display some level of seasonality, petroleum products do not show any significant trends.
+
+In the case of natural gas, we can see a clear increase in exports during the colder months, which could be due to increased demand for heating purposes. Conversely, during the warmer months, exports tend to decrease. This pattern is consistent throughout the years, with the exception of some yearly fluctuations.
+
+Regarding crude oil, the seasonal pattern is not as clear as with natural gas. However, we still observe a similar trend where exports tend to increase during the colder months and decrease during the warmer months. Interestingly, we see a deviation from this pattern in 2022, with exports remaining high even during spring and summer months. This could be attributed to the political tensions caused by the Russian invasion in Ukraine.
+
+On the other hand, the export of petroleum products does not appear to have any notable seasonal patterns. While there may be a slight increase towards the end of each year, there is no clear trend observed year-over-year.
+
+Overall, analyzing seasonal patterns in the US export of oil products can provide insights into demand patterns and other underlying factors that affect the global oil market.
+
+
+```{Seasoanl subseries plots]}
+#Subseries plots Natural gas
+total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(`Amount`)) %>% 
+  gg_subseries(Total_Exports) + 
+  ylab("Total exports") + 
+  ggtitle("Subseries plot: US exports of natural gas")+
+  scale_y_continuous(labels = comma_format())
+
+#Subseries plots Crude oil
+total_exp_oecd %>% filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(`Amount`)) %>% 
+  gg_subseries(Total_Exports) + 
+  ylab("Total exports") + 
+  ggtitle("Subseries plot: US exports of Crude Oil")+
+  scale_y_continuous(labels = comma_format())
+
+#Subseries plots Petroleum products
+total_exp_oecd %>% filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(`Amount`)) %>% 
+  gg_subseries(Total_Exports) + 
+  ylab("Total exports") + 
+  ggtitle("Subseries plot: US exports of Petroleum Products")+
+  scale_y_continuous(labels = comma_format())
+```
+To gain a better understanding of seasonality, we created additional plots known as subseries seasonal plots. These graphs provide a clearer view of monthly exports and also display the means over each month for the analyzed time series period.
+
+When we look at the subseries seasonal plot for natural gas exports, we can see a clear seasonality of increased natural gas exports during the colder seasons, starting from September and decreasing in spring. From the crude oil subseries seasonal plot, we can notice a huge increase in December and January as well, indicating that these months have a strong seasonal effect on crude oil exports. Finally, from the subseries seasonal plot of Petroleum products, we can notice the same increase in December, but there is a huge decrease in February and March. All other months are fluctuating more randomly without displaying any clear seasonality.
+
+In general, the seasonal subseries plots for all three types of oil exports to OECD reveal similar patterns to those seen in the seasonal plots. There is a clear increase in exports during the colder seasons, particularly in December and January, and a decrease during the warmer seasons. However, there are some fluctuations and irregularities throughout the year that do not follow a clear seasonal pattern.
+
+
+2.4 ACF and White Noise
+
+```{r}
+#ACF plot without lag Natural Gas
+
+total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(`Amount`)) %>% 
+  acf()
+
+
+#ACF plot without lag Crude Oil
+
+total_exp_oecd %>% filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(`Amount`)) %>% 
+  acf()
+
+#ACF plot without lag Petroleum
+
+total_exp_oecd %>% filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(`Amount`)) %>% 
+  acf()
+```
+
+The autocorrelation function (ACF) plot displays the correlation between a time series and its own lagged values. A high ACF value for a particular lag indicates that the current values of the time series are significantly correlated with the past values at that lag.
+
+The ACF plots without lag for US exports of Natural Gas, Crude Oil, and Petroleum Products to OECD reveal the presence of seasonality in the time series. The high positive correlation up to certain lags suggests that the exports display periodic behavior. This is consistent with the clear seasonality patterns observed in the previous plots.
+
+In the case of Natural Gas and Crude Oil, the ACF plots show a significant positive correlation up to approximately 12 lags, which is consistent with the monthly seasonality observed in the previous plots.
+
+Similarly, for petroleum products, we can see that the ACF values are above the upper confidence interval for the first four lags, indicating a strong positive correlation between the current values and the values from 1 to 4 months ago. However, after the fourth lag, the ACF values fall within the confidence interval, suggesting that the correlation weakens for longer lags. This also indicates a seasonality pattern, but it is not as strong as the pattern observed in crude oil exports.
