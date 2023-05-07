@@ -10,7 +10,8 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Analysing U.S. energy exports
 
-### Introduction 
+
+### 1.Introduction 
 
 Energy commodities play a pivotal role in the global economy, as they are essential for economic growth and development. They are required for transportation, manufacturing, heating, cooling, and many other critical activities that drive economic activity. 
 
@@ -22,9 +23,16 @@ OECD Europe was selected as the region, as because of geographical and historica
 
 In this study, we will analyze the impact of the war in Ukraine on US energy exports to OECD Europe. Specifically, we will focus on three main energy products: crude oil, petroleum products, and natural gas. By examining trends in these exports, we can better understand how the geopolitical events in Ukraine have affected the energy market in Europe. Additionally, we will investigate changes in OECD Europe's dependence on Russian gas to see how energy dynamics in the region have shifted. 
 
-  
 
-### Data preparation and overview
+
+
+### 2. Time Series Graphics
+
+In this section of the report, we will be creating time series graphics using various techniques such as time plots, seasonal plots, seasonal subseries plots, and ACF(). These plots will provide insights into the different time series in the dataset and help us understand their characteristics, such as seasonality, trend, and cyclicity. We will also look for unusual observations and changing patterns over time and explore the differences between the series in terms of these features. Additionally, for this analysis, we have decided to focus on three specific time series: US exports of Natural Gas to OECD, US Exports of Crude Oil to OECD, and US exports of Petroleum products to OECD. We will create the same types of graphs for all of these time series, including time plots, seasonal plots, seasonal subseries plots, and ACF plots. These time series span the last ten years from 2013 to 2023. Through these analyses, we aim to gain insights into the seasonality, cyclicity, trend, unusual observations, changing patterns, and differences between these time series, and determine if any of the series resemble a white noise process. By analyzing these time series graphics, we can gain a better understanding of the data and identify any potential patterns or anomalies that may exist within it.
+
+
+
+### 2.1 Dataset
 
 
 The data sets utilized in this study consist of monthly observations of Country’s reliance on Russian oil products, USA’s natural gas exports by country, USA’s total crude oil exports by destination, and USA’s petroleum products exports by destination.
@@ -34,56 +42,15 @@ Our primary source of data is the U.S. Energy Information Administration (EIA), 
 
 In case of data on reliance on Russian Oil the dataset contains monthly total oil imports from Russia as a percentage of total oil imports for a selected group of European countries belonging to the Organization for Economic Co-operation and Development (OECD) from January 1990 to October 2022. The dataset includes the date, country name, and the percentage of total oil imports that came from Russia for each observation. 
 
+In this section, we will analyze three datasets that pertain to US exports of Crude oil, Petroleum Products, and Natural Gas, all measured in barrels. Prior to converting the data to tsibble format, we performed data cleaning and formatting. To simplify the data, we converted each dataset to have the same structure, with three columns: date, destination country, and the amount exported. After standardizing the format, we converted each dataset to tsibble format. We then filtered the data to only include countries that are part of the OECD and summarized the results based on the amount exported on each date, removing country names and leaving only the date and amount exported. Finally, we merged all three tsibble tables into one by using the left join function and pivoting the data, resulting in a final time series that represents US exports of the three different products in barrels to OECD countries. The tsibble contains three columns: Date, Export Type, and Amount.
 
-
-```{r, Reliance on Russian oil_tsibble example, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
-
+```{r, data_prep, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
+library(fpp3)
 library(tidyverse)
-library(readr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
 library(lubridate)
-library(tsibble)
-
-oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
-                 "Finland", "France", "Germany", "Greece", "Hungary", "Iceland",
-                 "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg",
-                 "Netherlands", "Norway", "Poland", "Portugal", "Slovak Republic",
-                 "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey",
-                 "United Kingdom")
-
-raw_rel_rusoil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Monthly_Reliance_on_Russian_Oil.csv", skip = 1)
-
-rel_rusoil <- raw_rel_rusoil %>% 
-  pivot_longer(cols = -...1,
-               names_to = 'Date',
-               values_to = 'Total Oil Imports from Russia / Total Oil Imports (%)')
-
-rel_rusoil <- rel_rusoil %>% 
-  rename(Country = ...1) %>% 
-  mutate(Date = lubridate::dmy(Date)) %>% 
-  select("Date","Country","Total Oil Imports from Russia / Total Oil Imports (%)")
-
-
-ts_rel_rusoil <- rel_rusoil %>% 
-  as_tsibble(
-    index = Date,
-    key = Country)
-
-oecd_relrus <- ts_rel_rusoil %>%
-  filter(Country %in% oecd_europe)
-
-oecd_relrus %>% slice_sample(n=10)
-
-```
-
-In case of other three data sets
-
-```{r,Crude oil petroleum products and nat gas tsibble examples ,echo=FALSE, results='markup',warning=FALSE,message=FALSE}
-library(tidyverse)
-library(readr)
-library(lubridate)
-library(tsibble)
-
-################################################################################
 
 #Total Crude Oil Exports by Destination
 
@@ -126,6 +93,8 @@ ts_crude_oil <- crude_oil %>%
     key = `Destination country`
   )
 
+
+
 #OECD Europe Countries vector
 
 oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
@@ -139,7 +108,15 @@ oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
 
 oecd_crude_oil <- ts_crude_oil %>%
   filter(`Destination country` %in% oecd_europe) %>% 
-  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15")) 
+  filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15")) 
+
+oecd_crude_oil_agg <- oecd_crude_oil %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of Crude Oil (Thousand Barrels)`), sum) %>%
+  ungroup()
+
+
+################################################################################
 
 #Total Oil Products Exports by Destination
 
@@ -169,9 +146,37 @@ ts_oil_prod <- oil_prod %>%
 
 oecd_oil_prod <- ts_oil_prod %>% 
   filter(`Destination country` %in% oecd_europe) %>% 
-  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
+  filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15"))
 
-oecd_oil_prod %>% slice_sample(n=10)
+
+oecd_oil_prod_agg <- oecd_oil_prod %>%
+  index_by(Date) %>%
+  summarize_at(vars(`Amount of total Petroleum Porducts (Thousand Barrels)`), sum) %>%
+  ungroup()
+
+################################################################################
+#Reliance on Russian gas
+
+raw_rel_rusoil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Monthly_Reliance_on_Russian_Oil.csv", skip = 1)
+
+rel_rusoil <- raw_rel_rusoil %>% 
+  pivot_longer(cols = -...1,
+               names_to = 'Date',
+               values_to = 'Total Oil Imports from Russia / Total Oil Imports (%)')
+
+rel_rusoil <- rel_rusoil %>% 
+  rename(Country = ...1) %>% 
+  mutate(Date = lubridate::dmy(Date)) %>% 
+  select("Date","Country","Total Oil Imports from Russia / Total Oil Imports (%)")
+
+
+ts_rel_rusoil <- rel_rusoil %>% 
+  as_tsibble(
+    index = Date,
+    key = Country)
+
+oecd_relrus <- ts_rel_rusoil %>%
+  filter(Country %in% oecd_europe)
 
 ################################################################################
 #Total Natural Gas Exports by Destination
@@ -206,7 +211,6 @@ gastemp <- nat_gas %>%
                names_to = 'Destination country',
                values_to = 'Amount of Natural gas (MMcf)')
 
-
 #removing n/as in date column, fixing date formatting, fixing values (romoving space in the end)
 library(stringr) #for triming the strings
 
@@ -214,6 +218,7 @@ gastemp <- gastemp %>%
   drop_na(Date) %>% 
   mutate(Date = as.Date(Date)) %>% 
   mutate(`Destination country` = str_trim(`Destination country`))
+
 
 #summing duplicates 
 
@@ -236,53 +241,59 @@ ts_nat_gas <- gastemp %>%
 
 oecd_nat_gas <- ts_nat_gas %>%
   filter(`Destination country` %in% oecd_europe) %>% 
-  filter(Date >= as.Date("2013-01-15"), Date <= as.Date("2023-01-15"))
-
-oecd_nat_gas %>% slice_sample(n=10)
-```
-
-
-
-**Placeholder for methodologies**
-
-
-### 2. Time series graphics
-
-Done
-
-### 3. Time series decomposition
-
-#### 3.1. Adjustments
-
-After a thorough review of the data, we determined that no adjustments were necessary. We did not observe any calendar or population effects on the monthly exports data, and the exports data is already presented in barrels or barrels of oil equivalent (BOE), so no inflation adjustments were required.
-
-#### 3.2. Transformations
-
-Given the nature of the three data sets that are being used: Crude Oil Exports, Petroleum exports and Natural gas exports we decided that certain transformations might be necessary. Not normal distribution of the data and differing variance were seen as potential threat for correct conclusions. We identified Box-Cox transformation as necessary to continue since it stabilizes the variance of the data and makes the distribution more normal. This will  improve the reliability of the statistical tests and provide more accurate results. 
-
-For Box-Cox transformation to be performed we found lambda for each time series and than use it to transform the time series. 
-
-```{r, decomposition, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
-
-oecd_crude_oil_agg <- oecd_crude_oil %>%
-  index_by(Date) %>%
-  summarize_at(vars(`Amount of Crude Oil (Thousand Barrels)`), sum) %>%
-  ungroup()
-
-oecd_oil_prod_agg <- oecd_oil_prod %>%
-  index_by(Date) %>%
-  summarize_at(vars(`Amount of total Petroleum Porducts (Thousand Barrels)`), sum) %>%
-  ungroup()
+  filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15"))
 
 oecd_nat_gas_agg <- oecd_nat_gas %>%
   index_by(Date) %>%
   summarize_at(vars(`Amount of Natural gas (MMcf)`), sum) %>%
   ungroup()
 
+oecd_nat_gas_agg <- oecd_nat_gas_agg %>% 
+  mutate(`Amount of Natural gas (BOE)` = `Amount of Natural gas (MMcf)` * 1000 / 6000 )
+
+oecd_nat_gas_agg <- oecd_nat_gas_agg %>% 
+  select(Date, `Amount of Natural gas (BOE)`)
+
+################################################################################
+
+oecd_merged <- left_join(oecd_nat_gas_agg, oecd_oil_prod_agg, by = "Date") %>%
+  left_join(oecd_crude_oil_agg, by = "Date")
+
+total_exp_oecd <- oecd_merged %>%
+  pivot_longer(cols = -Date, names_to = "Export Type", values_to = "Amount")
+
+
+total_exp_oecd %>% ggplot(
+ aes(Date,Amount,color = `Export Type`)) +
+   geom_line()+
+   labs(x = "Date", y = "Amount")+
+  theme(legend.position = "bottom")
+
 
 ```
 
-```{r, decomposition, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
+
+
+### 3. Time series decomposition
+
+
+
+#### 3.1. Adjustments
+
+
+After a thorough review of the data, we determined that no adjustments were necessary. We did not observe any calendar or population effects on the monthly exports data, and the exports data is already presented in barrels or barrels of oil equivalent (BOE), so no inflation adjustments were required.
+
+
+
+#### 3.2. Transformations
+
+
+Given the nature of the three data sets that are being used: Crude Oil Exports, Petroleum exports and Natural gas exports we decided that certain transformations might be necessary. Not normal distribution of the data and differing variance were seen as potential threat for correct conclusions. We identified Box-Cox transformation as necessary to continue since it stabilizes the variance of the data and makes the distribution more normal. This will  improve the reliability of the statistical tests and provide more accurate results. 
+
+For Box-Cox transformation to be performed we found lambda for each time series and than use it to transform the time series. 
+
+
+```{r, box_cox, echo=TRUE, results='markup',warning=FALSE,message=FALSE}
 
 lambda1 <- oecd_crude_oil_agg %>% 
   features(`Amount of Crude Oil (Thousand Barrels)`, features = guerrero) %>% 
@@ -303,27 +314,47 @@ nat_gas_agg <- oecd_nat_gas_agg %>%
   mutate(`Amount of Natural gas (BOE)` = box_cox(`Amount of Natural gas (BOE)`, lambda3))
 
 ```
-
-```
-
-
-```
+  
+  
+  
+  
 #### 3.3. Decomposition
+
 
 STL Decomposition
 
-```{r, decomposition, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
+```{r, decomposition, echo=TRUE, results='markup',warning=FALSE,message=FALSE }
+
+dcmp_oecd_crude_oil <- oecd_crude_oil_agg %>%
+  model(stl = STL(`Amount of Crude Oil (Thousand Barrels)`))
+
+components(dcmp_oecd_crude_oil)
+
+
+dcmp_oecd_oil_prod <- oecd_oil_prod_agg %>%
+  model(stl = STL(`Amount of total Petroleum Porducts (Thousand Barrels)`))
+
+components(dcmp_oecd_oil_prod)
+
 
 dcmp_oecd_nat_gas <- oecd_nat_gas_agg %>%
-  model(stl = STL(`Amount of Natural gas (MMcf)`))
-
+  model(stl = STL(`Amount of Natural gas (BOE)`))
 
 components(dcmp_oecd_nat_gas)
+
+
+
+
 ```
 
 
-```{r}
+```{r, decomposition_plots, echo=FALSE, results='markup',warning=FALSE,message=FALSE }
 
+components(dcmp_oecd_crude_oil) %>% autoplot()
+
+components(dcmp_oecd_oil_prod) %>% autoplot()
+
+components(dcmp_oecd_nat_gas) %>% autoplot()
 ```
 
 
