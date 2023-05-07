@@ -403,3 +403,5 @@ The ACF plots without lag for US exports of Natural Gas, Crude Oil, and Petroleu
 In the case of Natural Gas and Crude Oil, the ACF plots show a significant positive correlation up to approximately 12 lags, which is consistent with the monthly seasonality observed in the previous plots.
 
 Similarly, for petroleum products, we can see that the ACF values are above the upper confidence interval for the first four lags, indicating a strong positive correlation between the current values and the values from 1 to 4 months ago. However, after the fourth lag, the ACF values fall within the confidence interval, suggesting that the correlation weakens for longer lags. This also indicates a seasonality pattern, but it is not as strong as the pattern observed in crude oil exports.
+
+Finally, based on the ACF plots of the US exports of natural gas, crude oil, and petroleum products to OECD, we can conclude that the time series do not appear to be white noise. 
