@@ -262,6 +262,7 @@ Given the nature of the three data sets that are being used: Crude Oil Exports, 
 
 For Box-Cox transformation to be performed we found lambda for each time series and than use it to transform the time series. 
 
+```{r, decomposition, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
 
 oecd_crude_oil_agg <- oecd_crude_oil %>%
   index_by(Date) %>%
@@ -279,14 +280,29 @@ oecd_nat_gas_agg <- oecd_nat_gas %>%
   ungroup()
 
 
-oecd_crude_oil_agg %>% features(`Amount of Crude Oil (Thousand Barrels)`, features = guerrero)
-oecd_crude_oil_agg <- box_cox(oecd_crude_oil_agg$`Amount of Crude Oil (Thousand Barrels)`, 0.28)
+```
 
-oecd_oil_prod_agg %>% features(`Amount of total Petroleum Porducts (Thousand Barrels)`, features = guerrero)
-oecd_oil_prod_agg  <- box_cox(oecd_oil_prod_agg$`Amount of total Petroleum Porducts (Thousand Barrels)`, 0.907)
+```{r, decomposition, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
 
-oecd_nat_gas_agg %>% features(oecd_nat_gas_agg$`Amount of Natural gas (BOE)`, features = guerrero)
-oecd_nat_gas_agg <- box_cox(oecd_nat_gas_agg$`Amount of Natural gas (MMcf)`, 1.13)
+lambda1 <- oecd_crude_oil_agg %>% 
+  features(`Amount of Crude Oil (Thousand Barrels)`, features = guerrero) %>% 
+  pull(lambda_guerrero)
+crude_oil_agg <- oecd_crude_oil_agg %>% 
+  mutate(`Amount of Crude Oil (Thousand Barrels)` = box_cox(`Amount of Crude Oil (Thousand Barrels)`, lambda1))
+
+lambda2 <- oecd_oil_prod_agg %>% 
+  features(`Amount of total Petroleum Porducts (Thousand Barrels)`, features = guerrero) %>% 
+  pull(lambda_guerrero)
+oil_prod_agg <-oecd_oil_prod_agg %>% 
+  mutate(`Amount of total Petroleum Porducts (Thousand Barrels)` = box_cox(`Amount of total Petroleum Porducts (Thousand Barrels)`, lambda2))
+
+lambda3 <- oecd_nat_gas_agg %>% 
+  features(`Amount of Natural gas (BOE)`, features = guerrero) %>% 
+  pull(lambda_guerrero)
+nat_gas_agg <- oecd_nat_gas_agg %>% 
+  mutate(`Amount of Natural gas (BOE)` = box_cox(`Amount of Natural gas (BOE)`, lambda3))
+
+```
 
 ```
 

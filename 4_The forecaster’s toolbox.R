@@ -201,7 +201,7 @@ oecd_oil_prod_agg
 #creating a training data set
 
 oil_prod_train <- oecd_oil_prod_agg %>% 
-  filter(Date <= as.Date("2020-01-01"))
+  filter(Date <= as.Date("2019-01-01"))
 oil_prod_train
 
 #fiting all four models
@@ -230,18 +230,16 @@ accuracy(oil_prod_fit) %>%
 oil_prod_fc %>% 
   autoplot(
     oecd_oil_prod_agg,
-    level = NULL
-  ) +
+    level = NULL) +
   labs(
     y = "Thousand Barrels",
-    title = "Forecasts for U.S. Petroleum Products exports to OECD Europe"
-  ) +
+    title = "Forecasts for U.S. Petroleum Products exports to OECD Europe") +
   guides(colour = guide_legend(title = "Forecast"))
 
 #Inspecting residuals
 
 mean_oil_prod <- oil_prod_train %>% 
-  model(MEAN(`Amount of total Petroleum Porducts (Thousand Barrels)`))
+  model(RW(`Amount of total Petroleum Porducts (Thousand Barrels)` ~ drift()))
 
 #not working 
 augment(mean_oil_prod) %>% 
@@ -272,6 +270,97 @@ augment(mean_oil_prod) %>%
 #Portmanteau test
 
 augment(mean_oil_prod) %>% 
-  features(.resid, ljung_box, lag = 10)
+  features(.resid, ljung_box, lag = 50)
 #do not reject null hypothesis of no autocorrelation (H0 - no autocorrelation in the residuals)
 #model seems to adequately capture the patterns in the data, at least with respect to autocorrelation
+
+
+################################################################################
+
+
+#Evaluating point forecast accuracy
+
+oecd_nat_gas_agg
+
+#creating a training data set
+
+nat_gas_train <- oecd_nat_gas_agg %>% 
+  filter(Date <= as.Date("2019-01-01"))
+
+nat_gas_train
+
+#fiting all four models
+
+nat_gas_fit <- nat_gas_train %>% 
+  model(
+    Mean = MEAN(`Amount of Natural gas (MMcf)`),
+    Naive = NAIVE(`Amount of Natural gas (MMcf)`),
+    SNaive = SNAIVE(`Amount of Natural gas (MMcf)`),
+    Drift = RW(`Amount of Natural gas (MMcf)` ~ drift())
+  )
+
+nat_gas_fit
+
+nat_gas_fc <- nat_gas_fit %>% 
+  forecast(h = 36)
+
+nat_gas_fc
+
+#evaluating the accuracy
+
+accuracy(nat_gas_fit) %>% 
+  arrange(.model) %>% 
+  select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE)
+
+
+#plotting all for models 
+
+nat_gas_fc %>% 
+  autoplot(
+    oecd_nat_gas_agg,
+    level = NULL) +
+  labs(
+    y = "Amount of natural gas (MMcf)",
+    title = "Forecasts for U.S. Natural gas exports to OECD Europe") +
+  guides(colour = guide_legend(title = "Forecast"))
+
+#Inspecting residuals
+
+naive_nat_gas <- nat_gas_train %>% 
+  model(NAIVE(`Amount of Natural gas (MMcf)`))
+
+#not working 
+augment(naive_nat_gas) %>% 
+  ggplot(aes(x = nat_gas_train$Date))+
+  geom_line(aes(y = nat_gas_train$`Amount of Natural gas (MMcf)`, colour = 'Data')) +
+  geom_abline(aes(y = .ftted, colour = 'Fitted'))
+
+#All residual diagnostic graphs
+gg_tsresiduals(naive_nat_gas)
+
+#plotting all residuals
+augment(naive_nat_gas) %>% 
+  autoplot(.resid) +
+  labs(y = 'Amount of Natural gas (MMcf)',
+       title = 'Residuals from the Naive model')
+#Histogram
+augment(naive_nat_gas) %>% 
+  ggplot(aes(x = .resid)) +
+  geom_histogram(bins = 50) +
+  labs(title = 'Histogram of naive model residuals')
+
+#ACF
+augment(naive_nat_gas) %>% 
+  ACF(.resid) %>% 
+  autoplot() + labs(title = 'ACF of residuals')
+
+
+#Portmanteau test
+
+augment(mean_oil_prod) %>% 
+  features(.resid, ljung_box, lag = 50)
+#do not reject null hypothesis of no autocorrelation (H0 - no autocorrelation in the residuals)
+#model seems to adequately capture the patterns in the data, at least with respect to autocorrelation
+
+
+
