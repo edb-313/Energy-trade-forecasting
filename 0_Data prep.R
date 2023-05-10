@@ -234,12 +234,14 @@ oecd_merged <- left_join(oecd_nat_gas_agg, oecd_oil_prod_agg, by = "Date") %>%
 total_exp_oecd <- oecd_merged %>%
   pivot_longer(cols = -Date, names_to = "Export Type", values_to = "Amount")
 
+total_exp_oecd
 
 total_exp_oecd %>% ggplot(
  aes(Date,Amount,color = `Export Type`)) +
    geom_line()+
    labs(x = "Date", y = "Amount")+
   theme(legend.position = "bottom")
+
 
 
 

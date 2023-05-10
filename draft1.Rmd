@@ -1,12 +1,20 @@
 ---
 title: "FM project"
-output: html_document
+output:
+  html_document:
+    citation_package: citr
 date: "2023-04-25"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
 ```
+
+Reads
+
+https://www.eia.gov/todayinenergy/detail.php?id=55920#:~:text=Europe%20became%20the%20primary%20destination,U.S.%20LNG%20exports%20to%20Europe.
+
 
 ## Analysing U.S. energy exports
 
@@ -32,7 +40,7 @@ In this section of the report, we will be creating time series graphics using va
 
 
 
-### 2.1 Dataset
+#### 2.1 Dataset
 
 
 The data sets utilized in this study consist of monthly observations of Country’s reliance on Russian oil products, USA’s natural gas exports by country, USA’s total crude oil exports by destination, and USA’s petroleum products exports by destination.
@@ -271,13 +279,41 @@ total_exp_oecd %>% ggplot(
 
 
 ```
+**Comment on Nat Gas export zeros**
 
+#### 2.2 Time Series Plots
 
+Firstly, we will examine a general overview of the three products: US exports of Crude Oil, Petroleum Products, and Natural Gas to OECD countries in barrels over the last ten years. This analysis will provide us with an understanding of the overall trend and magnitude of the exports. By examining the trend, we can identify any significant changes in the exports over the years and evaluate the magnitude to determine which product has the highest export value. This overview will be a crucial step before we dive deeper into the individual time series of each product.
 
+#### Including Plots
+
+The graph below reveals significant growth in Crude oil and Natural gas exports since around 2015, with a clear year-on-year increase in both goods, indicating a noticeable trend. Moreover, it appears that the time series for these two products are non-stationary, possibly suggesting the presence of a trend, seasonality, or both. In 2022/2023, Crude oil and Natural gas exports reached their peak, with crude oil almost 60,000 and natural gas around 40,000. Conversely, the time series for Petroleum products appears to be stationary, with a slight increasing trend that may require further analysis.
+
+```{r, time series overview, echo=TRUE, results='markup',warning=FALSE,message=FALSE}
+
+total_exp_oecd %>% ggplot(
+ aes(Date,Amount,color = `Export Type`)) +
+   geom_line()+
+   labs(x = "Date", y = "Amount")+
+  theme(legend.position = "bottom")
+
+```
+
+In the graph below, we have plotted each exported product separately to provide a better picture of each time series. The data shows that crude oil exports began in 2016 with lower amounts initially, but within a few years, exports boomed. Since 2016, there has been a significant positive trend, possibly with seasonality. In 2020, crude oil exports reached a peak of around 50,000 barrels. Then, due to the COVID-19 pandemic, exports decreased for two years. However, in the beginning of 2022, exports increased significantly, most likely due to the Russian invasion in Ukraine. Currently, exports of crude oil are at a peak, reaching almost 60,000 barrels.
+
+Looking at natural gas exports, we can see that the US did not export to OECD countries until after 2016, when low amounts of natural gas were first exported. In 2018, exports increased significantly, reaching their first peak in 2020. We can see a similar positive trend and possible seasonality as in the crude oil graph. During the COVID-19 pandemic, exports decreased significantly, but again, after the Russian invasion, exports increased significantly, reaching 40,000 barrels. This suggests that OECD countries stopped buying natural gas from Russia.
+
+Finally, looking at petroleum product exports, we can see some fluctuations since 2010, but no clear trend. Seasonality may exist. The changes during COVID-19 and after the Russian invasion were not as significant as in the other two graphs.
+
+```{r, overview by product, echo=TRUE, results='markup',warning=FALSE,message=FALSE}
+total_exp_oecd %>%  
+  ggplot(aes(Date, Amount, color = `Export Type`)) +
+  geom_line()+
+  labs(x = "Date", y = "Amount")+
+  theme(legend.position = "bottom") +
+  facet_wrap(~`Export Type`, ncol = 1)
+```
 ### 3. Time series decomposition
-
-
-
 #### 3.1. Adjustments
 
 
@@ -288,12 +324,12 @@ After a thorough review of the data, we determined that no adjustments were nece
 #### 3.2. Transformations
 
 
-Given the nature of the three data sets that are being used: Crude Oil Exports, Petroleum exports and Natural gas exports we decided that certain transformations might be necessary. Not normal distribution of the data and differing variance were seen as potential threat for correct conclusions. We identified Box-Cox transformation as necessary to continue since it stabilizes the variance of the data and makes the distribution more normal. This will  improve the reliability of the statistical tests and provide more accurate results. 
+Given the nature of the three data sets that are being used: Crude Oil Exports, Petroleum exports and Natural gas exports we decided that certain transformations might be necessary for further analysis. Not normal distribution of the data and differing variance were seen as potential threat for correct conclusions. We identified Box-Cox transformation as necessary to continue since it stabilizes the variance of the data and makes the distribution more normal. This will  improve the reliability of the statistical tests and provide more accurate results. 
 
 For Box-Cox transformation to be performed we found lambda for each time series and than use it to transform the time series. 
 
 
-```{r, box_cox, echo=TRUE, results='markup',warning=FALSE,message=FALSE}
+```{r, box_cox, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
 
 lambda1 <- oecd_crude_oil_agg %>% 
   features(`Amount of Crude Oil (Thousand Barrels)`, features = guerrero) %>% 
@@ -321,9 +357,9 @@ nat_gas_agg <- oecd_nat_gas_agg %>%
 #### 3.3. Decomposition
 
 
-STL Decomposition
+###STL Decomposition
 
-```{r, decomposition, echo=TRUE, results='markup',warning=FALSE,message=FALSE }
+```{r, decomposition, echo=FALSE, results='markup',warning=FALSE,message=FALSE }
 
 dcmp_oecd_crude_oil <- oecd_crude_oil_agg %>%
   model(stl = STL(`Amount of Crude Oil (Thousand Barrels)`))
@@ -357,12 +393,23 @@ components(dcmp_oecd_oil_prod) %>% autoplot()
 components(dcmp_oecd_nat_gas) %>% autoplot()
 ```
 
+We used STL decomposition to decompose the Box-Cox transformed time series into three components: trend, seasonal, and residual. Four graphs were plotted, three of which display the trend, seasonal, and residual components, respectively while fourth one, the one at the top, represent the export amounts from 2013 to 2023.
 
+Looking at the graphs we see that in case of natural gas exports actual patterns can only be seen appearing after approximately 2016 when the U.S.
+
+There are several conclusions to be drawn looking at the STL decomposition. First of all, we can see clear trend in exports of crude oil and natural gas while petroleum products does not have clear trend. In both cases of exports of crude oil and natural gas we can clearly see slight drops in exports after 2020 which can be explained by COVID 19 pandemic and continued growths after situation normalized. Another observation worth mentioning is the fact that exports of two mentioned products hits all time high around the year 2022. This can be explained by huge declines of both products from Russia after sanction were imposed. 
+
+
+Moreover, we can see seasonality in exports of all three products.That is no surprise, given that all energy products are highly reactive to different seasons.
+
+After decomposing the data of all three time series and looking at each components separately we decided that exports of petroleum products will not be analysed further. Exports of petroleum products to OECD Europe markets does not have clear trend therefore indicating that Russian invasion in Ukraine did not have positive effect on growing imports from US. This can be explained by the fact that embargo on refined oil products from EU 27 was introduced as of 5 February 2023. Therefore, Russian war on Ukraine and sanctions on Russia that followed did not have any visible effect on US exports of petroleum products to OECD Europe markets.   
 
 
 ## 4. The forecaster’s toolbox
 
-Almost done, needs bit more input
+#### 4.1. Exploring different simple forecasting methods
+
+
 
 ## 5. Exponential smoothing
 
