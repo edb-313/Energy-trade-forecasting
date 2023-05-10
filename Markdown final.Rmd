@@ -378,29 +378,28 @@ In general, the seasonal subseries plots for all three types of oil exports to O
 total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
-  ACF() %>% autoplot()
+  ACF() %>%  autoplot()
 
 #ACF plot without lag Crude Oil
 
 total_exp_oecd %>% filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
-  ACF() %>% autoplot()
+  ACF() %>%  autoplot()
 
 #ACF plot without lag Petroleum
 
 total_exp_oecd %>% filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
-  ACF() %>% autoplot()
+  ACF() %>%  autoplot()
+
 ```
 
 The autocorrelation function (ACF) plot displays the correlation between a time series and its own lagged values. A high ACF value for a particular lag indicates that the current values of the time series are significantly correlated with the past values at that lag.
 
-The ACF plots  for US exports of Natural Gas, Crude Oil, and Petroleum Products to OECD reveal the presence of seasonality in the time series. The high positive correlation up to certain lags suggests that the exports display periodic behavior. This is consistent with the clear seasonality patterns observed in the previous plots.
+The ACF plots for US exports of Natural Gas, Crude Oil to OECD reveal interesting insights regarding the seasonality and trends in the time series. In the case of Natural Gas and Crude Oil, the ACF plots demonstrate a significant positive correlation, indicating the presence of high trend component with slight seasonality patterns observed as. However, these plots reflect a dominant upward trend, as evidenced by the substantial increase in exports. The trend component seems to be overtaking the seasonality, suggesting that the overall upward trend in exports is more prominent than the periodic variation in the data.
 
-In the case of Natural Gas and Crude Oil, the ACF plots show a significant positive correlation up to approximately 12 lags, which is consistent with the monthly seasonality observed in the previous plots.
-
-Similarly, for petroleum products, we can see that the ACF values are above the upper confidence interval for the first four lags, indicating a strong positive correlation between the current values and the values from 1 to 4 months ago. However, after the fourth lag, the ACF values fall within the confidence interval, suggesting that the correlation weakens for longer lags. This also indicates a seasonality pattern, but it is not as strong as the pattern observed in crude oil exports.
+The ACF plot for US exports of Petroleum Products to OECD indicates that there is no noticeable seasonality in the time series. The first three lags show significant positive correlations, suggesting some short-term dependence between current exports and those from 1 to 3 months ago. However, beyond the third lag, the ACF values fall within the confidence interval, indicating a weakening of the correlation. This suggests that there is no clear and consistent pattern of seasonality in the exports of petroleum products.
 
 Finally, based on the ACF plots of the US exports of natural gas, crude oil, and petroleum products to OECD, we can conclude that the time series do not appear to be white noise. 
