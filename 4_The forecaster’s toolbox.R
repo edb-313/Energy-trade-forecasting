@@ -2,12 +2,12 @@
 
 ########################### Crude Oil Exports ###################################
 
-oecd_crude_oil_agg %>% 
+crude_oil_agg %>% 
   autoplot(`Amount of Crude Oil (Thousand Barrels)`)
 
 #fiting the models
 
-crude_oil_fit <- oecd_crude_oil_agg %>% 
+crude_oil_fit <- crude_oil_agg %>% 
   model(
     Seasonal_naive = SNAIVE(`Amount of Crude Oil (Thousand Barrels)`),
     Naive = NAIVE(`Amount of Crude Oil (Thousand Barrels)`),
@@ -28,7 +28,7 @@ crude_oil_fc %>%
 #plotting all forecasting models against historical data
 
 crude_oil_fc %>% 
-  autoplot(oecd_crude_oil_agg, level = NULL) +
+  autoplot(crude_oil_agg, level = NULL) +
   ggtitle("Forecasts for U.S. Crude Oil exports to OECD Europe") +
   xlab("Year") + ylab("Thousand Barrels") +
   guides(colour = guide_legend(title = "Forecast"))
@@ -39,7 +39,7 @@ crude_oil_fc %>%
 
 #fiting the models
 
-oil_prod_fit <- oecd_oil_prod_agg %>% 
+oil_prod_fit <- oil_prod_agg %>% 
   model(
     Seasonal_naive = SNAIVE(`Amount of total Petroleum Porducts (Thousand Barrels)`),
     Naive = NAIVE(`Amount of total Petroleum Porducts (Thousand Barrels)`),
@@ -115,7 +115,7 @@ oecd_crude_oil_agg
 
 #creating a training data set
 
-crude_oil_train <- oecd_crude_oil_agg %>% 
+crude_oil_train <- crude_oil_agg %>% 
   filter(Date >= as.Date("2015-06-01"), Date <= as.Date("2021-06-01"))
 
 #fiting all four models
@@ -143,7 +143,7 @@ accuracy(crude_oil_fit) %>%
 
 crude_oil_fc %>% 
   autoplot(
-    oecd_crude_oil_agg,
+    crude_oil_agg,
     level = NULL
   ) +
   labs(

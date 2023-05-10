@@ -61,17 +61,14 @@ components(dcmp_oecd_crude_oil) %>% gg_subseries(season_year)
 
 
 #######################################################################################
-install.packages("seasonal")
-install.packages("XQuartz")
 library(seasonal)
-library(Xqua)
 
-x11_dcmp <- oecd_crude_oil_agg %>% 
-  model(x11 = X_13ARIMA_SEATS(oecd_crude_oil(`Amount of Crude Oil (Thousand Barrels)` ~ x11()))) %>% 
+seats_dcmp_crude_oil <- oecd_crude_oil_agg %>% 
+  model(seats = X_13ARIMA_SEATS(`Amount of Crude Oil (Thousand Barrels)` ~ seats())) %>% 
   components()
-autoplot(x11_dcmp) +
+autoplot(seats_dcmp_crude_oil) +
   labs(title =
-         "Decomposition of US Crude oil exports to OECD Europe using X-11.")
+         "Decomposition of US crude oil exports to OECD Europe using SEATS")
 
 
 ###########  Oil Products Exports #######################################################
@@ -99,8 +96,11 @@ oecd_oil_prod_agg %>% features(`Amount of total Petroleum Porducts (Thousand Bar
 
 #box cox transformation
 
-oecd_oil_prod_agg %>% autoplot(box_cox(`Amount of total Petroleum Porducts (Thousand Barrels)`, 0.73)) +
-  labs(y = "Box-Cox transformed exportamounts")
+lambda1 <- oecd_crude_oil_agg %>% 
+  features(`Amount of Crude Oil (Thousand Barrels)`, features = guerrero) %>% 
+  pull(lambda_guerrero)
+crude_oil_agg <- oecd_crude_oil_agg %>% 
+  mutate(`Amount of Crude Oil (Thousand Barrels)` = box_cox(`Amount of Crude Oil (Thousand Barrels)`, lambda1))
 
 #decomposition
 
@@ -125,6 +125,9 @@ oecd_oil_prod_agg %>%
 #seasonal oomponent
 
 components(dcmp_oecd_oil_prod) %>% gg_subseries(season_year)
+
+
+
 
 
 ########### Natural Gas Exports #######################################################

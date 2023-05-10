@@ -184,9 +184,6 @@ gastemp <- gastemp %>%
   mutate(Date = as.Date(Date)) %>% 
   mutate(`Destination country` = str_trim(`Destination country`))
 
-#identifying duplicate values 
-
-duplicates(gastemp, index = "Date", key = "Destination country")
 
 #summing duplicates 
 

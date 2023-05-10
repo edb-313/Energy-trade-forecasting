@@ -372,7 +372,7 @@ In general, the seasonal subseries plots for all three types of oil exports to O
 
 2.4 ACF and White Noise
 
-```{r}
+```{r, ACF plots,box_cox, echo=FALSE, results='markup',warning=FALSE,message=FALSE }
 #ACF plot without lag Natural Gas
 
 total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
