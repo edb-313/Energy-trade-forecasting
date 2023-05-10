@@ -164,7 +164,7 @@ total_exports_OECD_quarter %>% filter(`Export Type`=="Amount of total Petroleum 
 total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
-  acf()
+  ACF() %>%  autoplot()
 
 
 #ACF plot without lag Crude Oil
@@ -172,10 +172,14 @@ total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>%
 total_exp_oecd %>% filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
-  acf()
+  ACF() %>%  autoplot()
 
 #ACF plot without lag Petroleum
 
+total_exp_oecd %>% filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(`Amount`)) %>% 
+  ACF() %>%  autoplot()
 total_exp_oecd %>% filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
