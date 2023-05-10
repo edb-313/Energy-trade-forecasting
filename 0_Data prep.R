@@ -239,6 +239,10 @@ total_exp_oecd %>% ggplot(
    labs(x = "Date", y = "Amount")+
   theme(legend.position = "bottom")
 
+total_exp_oecd
 
-
-
+total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(Amount)) %>% 
+  features(Amount, features = guerrero) %>% 
+  pull(lambda_guerrero)

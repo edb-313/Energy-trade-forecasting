@@ -441,9 +441,14 @@ For Box-Cox transformation to be performed we found lambda for each time series 
 
 ```{r, box_cox, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
 
-lambda1 <- oecd_crude_oil_agg %>% 
-  features(`Amount of Crude Oil (Thousand Barrels)`, features = guerrero) %>% 
+lambda1 <- total_exp_oecd %>% 
+  filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(Amount)) %>% 
+  features(Amount, features = guerrero) %>% 
   pull(lambda_guerrero)
+
+
 crude_oil_agg <- oecd_crude_oil_agg %>% 
   mutate(`Amount of Crude Oil (Thousand Barrels)` = box_cox(`Amount of Crude Oil (Thousand Barrels)`, lambda1))
 
