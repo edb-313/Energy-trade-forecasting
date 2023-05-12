@@ -442,27 +442,43 @@ For Box-Cox transformation to be performed we found lambda for each time series 
 ```{r, box_cox, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
 
 lambda1 <- total_exp_oecd %>% 
+  filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(Amount)) %>% 
+  features(Total_Exports, features = guerrero) %>% 
+  pull(lambda_guerrero)
+
+crude_oil_bx <-total_exp_oecd %>% 
+  filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(Amount)) %>% 
+  mutate(Total_Exports = box_cox(Total_Exports + 1, lambda1))
+
+lambda2 <- total_exp_oecd %>% 
+  filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(Amount)) %>% 
+  features(Total_Exports, features = guerrero) %>% 
+  pull(lambda_guerrero)
+
+pet_prod_bx <-total_exp_oecd %>% 
+  filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(Amount)) %>% 
+  mutate(Total_Exports = box_cox(Total_Exports + 1, lambda2))
+
+lambda3 <- total_exp_oecd %>% 
   filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(Amount)) %>% 
-  features(Amount, features = guerrero) %>% 
+  features(Total_Exports, features = guerrero) %>% 
   pull(lambda_guerrero)
 
-
-crude_oil_agg <- oecd_crude_oil_agg %>% 
-  mutate(`Amount of Crude Oil (Thousand Barrels)` = box_cox(`Amount of Crude Oil (Thousand Barrels)`, lambda1))
-
-lambda2 <- oecd_oil_prod_agg %>% 
-  features(`Amount of total Petroleum Porducts (Thousand Barrels)`, features = guerrero) %>% 
-  pull(lambda_guerrero)
-oil_prod_agg <-oecd_oil_prod_agg %>% 
-  mutate(`Amount of total Petroleum Porducts (Thousand Barrels)` = box_cox(`Amount of total Petroleum Porducts (Thousand Barrels)`, lambda2))
-
-lambda3 <- oecd_nat_gas_agg %>% 
-  features(`Amount of Natural gas (BOE)`, features = guerrero) %>% 
-  pull(lambda_guerrero)
-nat_gas_agg <- oecd_nat_gas_agg %>% 
-  mutate(`Amount of Natural gas (BOE)` = box_cox(`Amount of Natural gas (BOE)`, lambda3))
+nat_gas_bx <-total_exp_oecd %>% 
+  filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(Amount)) %>% 
+  mutate(Total_Exports = box_cox(Total_Exports + 1, lambda3))
 
 ```
   
@@ -476,22 +492,22 @@ nat_gas_agg <- oecd_nat_gas_agg %>%
 
 ```{r, decomposition, echo=FALSE, results='markup',warning=FALSE,message=FALSE }
 
-dcmp_oecd_crude_oil <- oecd_crude_oil_agg %>%
-  model(stl = STL(`Amount of Crude Oil (Thousand Barrels)`))
+dcmp_crude_oil <- crude_oil_bx %>%
+  model(stl = STL(Total_Exports))
 
-components(dcmp_oecd_crude_oil)
-
-
-dcmp_oecd_oil_prod <- oecd_oil_prod_agg %>%
-  model(stl = STL(`Amount of total Petroleum Porducts (Thousand Barrels)`))
-
-components(dcmp_oecd_oil_prod)
+components(dcmp_crude_oil)
 
 
-dcmp_oecd_nat_gas <- oecd_nat_gas_agg %>%
-  model(stl = STL(`Amount of Natural gas (BOE)`))
+dcmp_oil_prod <- pet_prod_bx %>%
+  model(stl = STL(Total_Exports))
 
-components(dcmp_oecd_nat_gas)
+components(dcmp_oil_prod)
+
+
+dcmp_nat_gas <- nat_gas_bx %>%
+  model(stl = STL(Total_Exports))
+
+components(dcmp_nat_gas)
 
 
 
@@ -501,11 +517,11 @@ components(dcmp_oecd_nat_gas)
 
 ```{r, decomposition_plots, echo=FALSE, results='markup',warning=FALSE,message=FALSE }
 
-components(dcmp_oecd_crude_oil) %>% autoplot()
+components(dcmp_crude_oil) %>% autoplot()
 
-components(dcmp_oecd_oil_prod) %>% autoplot()
+components(dcmp_oil_prod) %>% autoplot()
 
-components(dcmp_oecd_nat_gas) %>% autoplot()
+components(dcmp_nat_gas) %>% autoplot()
 ```
 
 We used STL decomposition to decompose the Box-Cox transformed time series into three components: trend, seasonal, and residual. Four graphs were plotted, three of which display the trend, seasonal, and residual components, respectively while fourth one, the one at the top, represent the export amounts from 2013 to 2023.
@@ -522,68 +538,29 @@ After decomposing the data of all three time series and looking at each componen
 
 ## 4. The forecaster’s toolbox
 
-#### 4.1. Exploring different simple forecasting methods
+#### 4.1. Finding the fit
 
-Before moving forward with forecasting using simple forecasting methods we take a look at both time series and what simple forecasting methods works best with both
+When choosing from four possible simple forecasting methods the intuition tells us that the most appropriate method in our case is Drift method. Clear trend is seen in both crude oil and natural gas exports data and drift method  allows the forecasts to increase or decrease over time based on the change in the historical data. 
 
-```{r, evaluating models,echo=FALSE, results='markup',warning=FALSE,message=FALSE  }
+```{r, forecasting plots, models,echo=FALSE, results='markup',warning=FALSE,message=FALSE }
 
-crude_oil_train <- crude_oil_agg %>% 
-  filter(Date >= as.Date("2015-06-01"), Date <= as.Date("2021-06-01"))
+crude_oil_tr <- crude_oil_bx %>% 
+  filter(Date >= as.Date("2010-06-01"), Date <= as.Date("2020-06-01"))
 
-#fiting all four models
-
-crude_oil_fit <- crude_oil_train %>% 
+crude_oil_fit <- crude_oil_tr %>% 
   model(
-    Mean = MEAN(`Amount of Crude Oil (Thousand Barrels)`),
-    Naive = NAIVE(`Amount of Crude Oil (Thousand Barrels)`),
-    SNaive = SNAIVE(`Amount of Crude Oil (Thousand Barrels)`),
-    Drift = RW(`Amount of Crude Oil (Thousand Barrels)` ~ drift())
+    Mean = MEAN(Total_Exports),
+    Naive = NAIVE(Total_Exports),
+    SNaive = SNAIVE(Total_Exports),
+    Drift = RW(Total_Exports ~ drift())
   )
 
 crude_oil_fc <- crude_oil_fit %>% 
   forecast(h = 36)
 
-#Time series cross validation
-
-accuracy1 <- accuracy(crude_oil_fit) %>% 
-  arrange(.model) %>% 
-  select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE)
-
-nat_gas_train <- nat_gas_agg %>% 
-  filter(Date <= as.Date("2021-06-01"))
-
-
-#fiting all four models
-
-nat_gas_fit <- nat_gas_train %>% 
-  model(
-    Mean = MEAN(`Amount of Natural gas (BOE)`),
-    Naive = NAIVE(`Amount of Natural gas (BOE)`),
-    SNaive = SNAIVE(`Amount of Natural gas (BOE)`),
-    Drift = RW(`Amount of Natural gas (BOE)` ~ drift())
-  )
-
-nat_gas_fc <- nat_gas_fit %>% 
-  forecast(h = 36)
-
-
-#evaluating the accuracy
-
-accuracy2 <- accuracy(nat_gas_fit) %>% 
-  arrange(.model) %>% 
-  select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE)
-
-
-```
-
-We begin with evaluating each method performance on given time series using function accuracy() and then plot each method against train data to see visually see how each method performs. 
-
-```{r, forecasting plots, models,echo=FALSE, results='markup',warning=FALSE,message=FALSE }
-
 crude_oil_fc %>% 
   autoplot(
-    crude_oil_agg,
+    crude_oil_bx,
     level = NULL
   ) +
   labs(
@@ -592,9 +569,25 @@ crude_oil_fc %>%
   ) +
   guides(colour = guide_legend(title = "Forecast"))
 
+
+nat_gas_tr <- nat_gas_bx %>% 
+  filter(Date <= as.Date("2020-06-01"))
+
+
+nat_gas_fit <- nat_gas_tr %>% 
+  model(
+    Mean = MEAN(Total_Exports),
+    Naive = NAIVE(Total_Exports),
+    SNaive = SNAIVE(Total_Exports),
+    Drift = RW(Total_Exports ~ drift())
+  )
+
+nat_gas_fc <- nat_gas_fit %>% 
+  forecast(h = 36)
+
 nat_gas_fc %>% 
   autoplot(
-    nat_gas_agg,
+    nat_gas_bx,
     level = NULL) +
   labs(
     y = "Amount of natural gas (BOE)",
@@ -602,7 +595,64 @@ nat_gas_fc %>%
   guides(colour = guide_legend(title = "Forecast"))
 
 ```
-Looking at the 
+
+Only looking at plots in Figure [] we can see that our intuition was right and drift method still seems as most appropriate after conducting visual inspection. Though, it is important to highlight that if in case of crude oil exports Drift method was actually quite good at forecasting export amounts, in the case of natural gas exports Drift method looked as best of all but still quite far away from actual data. The important takeaway at this point is the fact that the average growth rate calculated from historical data was strongly effected by dropped exports during the COVID pandemic. 
+
+After inspecting data visually we will conduct cross validation to see if our initial predictions that Drift method is most appropriate to forecast both time series was right. 
+
+
+```{r, accuracy ,echo=FALSE, results='markup',warning=FALSE,message=FALSE  }
+#Traditional accuracy
+
+accuracy1 <- accuracy(crude_oil_fit) %>% 
+  arrange(.model) %>% 
+  select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE)
+
+accuracy1
+
+accuracy2 <- accuracy(nat_gas_fit) %>% 
+  arrange(.model) %>% 
+  select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE)
+
+accuracy2
+
+```
+
+```{r, time series cross validation,echo=FALSE, results='markup',warning=FALSE,message=FALSE  }
+#Time series cross validation
+
+crude_oil_tr2 <- crude_oil_bx %>%
+stretch_tsibble(.init = 3, .step = 1) %>%
+relocate(Date,Total_Exports, .id)
+
+crude_oil_tr2 %>%
+model(Drift = RW(Total_Exports ~ drift())) %>%
+forecast(h = 12) %>%
+accuracy(crude_oil_bx)
+
+crude_oil_bx |>
+  model(RW(Total_Exports ~ drift())) |>
+  accuracy()
+```
+
+#### 4.3. Residual diagnostics
+
+```{r, residual diagnostics,echo=FALSE, results='markup',warning=FALSE,message=FALSE  }
+#Inspecting residuals
+
+drift_crude_oil <- crude_oil_tr %>% 
+  model(NAIVE(Total_Exports))
+
+#All residual diagnostic graphs
+gg_tsresiduals(drift_crude_oil)
+
+
+drift_nat_gas <- nat_gas_tr %>% 
+  model(RW(Total_Exports ~ drift()))
+
+gg_tsresiduals(drift_nat_gas)
+```
+
 
 ## 5. Exponential smoothing
 
