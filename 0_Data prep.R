@@ -241,8 +241,20 @@ total_exp_oecd %>% ggplot(
 
 total_exp_oecd
 
-total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+lambda1 <- total_exp_oecd %>% 
+  filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(Amount)) %>% 
-  features(Amount, features = guerrero) %>% 
+  features(Total_Exports, features = guerrero) %>% 
   pull(lambda_guerrero)
+
+lambda1
+
+nat_gas_bx <-total_exp_oecd %>% 
+  filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+  index_by(Date) %>% 
+  summarise(Total_Exports = sum(Amount)) %>% 
+  mutate(Total_Exports = box_cox(Total_Exports + 1, lambda1))
+
+crude_oil_bx
+

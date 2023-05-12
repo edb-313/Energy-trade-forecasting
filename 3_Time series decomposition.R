@@ -99,6 +99,9 @@ oecd_oil_prod_agg %>% features(`Amount of total Petroleum Porducts (Thousand Bar
 lambda1 <- oecd_crude_oil_agg %>% 
   features(`Amount of Crude Oil (Thousand Barrels)`, features = guerrero) %>% 
   pull(lambda_guerrero)
+
+lambda1
+
 crude_oil_agg <- oecd_crude_oil_agg %>% 
   mutate(`Amount of Crude Oil (Thousand Barrels)` = box_cox(`Amount of Crude Oil (Thousand Barrels)`, lambda1))
 
@@ -156,7 +159,7 @@ oecd_nat_gas_agg %>% features(`Amount of Natural gas (MMcf)`, features = guerrer
 
 #box cox transformation
 
-oecd_nat_gas_agg %>% autoplot(box_cox(`Amount of Natural gas (MMcf)`, 0.390)) +
+oecd_nat_gas_agg %>% autoplot(box_cox(`Amount of Natural gas (BOE)`, 0.390)) +
   labs(y = "Box-Cox transformed exportamounts")
 
 #decomposition

@@ -225,11 +225,12 @@ accuracy(oil_prod_fit) %>%
   arrange(.model) %>% 
   select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE)
 
-#plotting all for models
+#plotting all for models 
 
 oil_prod_fc %>% 
   autoplot(
-    oecd_oil_prod_agg, level = NULL) +
+    oecd_oil_prod_agg,
+    level = NULL) +
   labs(
     y = "Thousand Barrels",
     title = "Forecasts for U.S. Petroleum Products exports to OECD Europe") +
@@ -326,7 +327,7 @@ nat_gas_fc %>%
 #Inspecting residuals
 
 naive_nat_gas <- nat_gas_train %>% 
-  model(NAIVE(`Amount of Natural gas (MMcf)`))
+  model(NAIVE(nat_gas_train$Total_Exports))
 
 #not working 
 augment(naive_nat_gas) %>% 
