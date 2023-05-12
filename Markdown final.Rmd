@@ -372,7 +372,7 @@ In general, the seasonal subseries plots for all three types of oil exports to O
 
 2.4 ACF and White Noise
 
-```{r, ACF plots,box_cox, echo=FALSE, results='markup',warning=FALSE,message=FALSE }
+```{r}
 #ACF plot without lag Natural Gas
 
 total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
@@ -403,3 +403,6 @@ The ACF plots for US exports of Natural Gas, Crude Oil to OECD reveal interestin
 The ACF plot for US exports of Petroleum Products to OECD indicates that there is no noticeable seasonality in the time series. The first three lags show significant positive correlations, suggesting some short-term dependence between current exports and those from 1 to 3 months ago. However, beyond the third lag, the ACF values fall within the confidence interval, indicating a weakening of the correlation. This suggests that there is no clear and consistent pattern of seasonality in the exports of petroleum products.
 
 Finally, based on the ACF plots of the US exports of natural gas, crude oil, and petroleum products to OECD, we can conclude that the time series do not appear to be white noise. 
+
+
+

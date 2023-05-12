@@ -225,12 +225,11 @@ accuracy(oil_prod_fit) %>%
   arrange(.model) %>% 
   select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE)
 
-#plotting all for models 
+#plotting all for models
 
 oil_prod_fc %>% 
   autoplot(
-    oecd_oil_prod_agg,
-    level = NULL) +
+    oecd_oil_prod_agg, level = NULL) +
   labs(
     y = "Thousand Barrels",
     title = "Forecasts for U.S. Petroleum Products exports to OECD Europe") +
