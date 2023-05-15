@@ -1,10 +1,11 @@
 ---
 title: "FM project"
 output:
-  pdf_document: default
   html_document:
-    citation_package: citr
-date: "2023-04-25"
+  toc: true
+  toc_depth: 2
+  theme: simplex
+  date: "2023-04-25"
 ---
 
 ```{r setup, include=FALSE}
