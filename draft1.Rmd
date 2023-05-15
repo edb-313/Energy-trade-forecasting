@@ -1,6 +1,7 @@
 ---
 title: "FM project"
 output:
+  pdf_document: default
   html_document:
     citation_package: citr
 date: "2023-04-25"
@@ -52,7 +53,7 @@ In case of data on reliance on Russian Oil the dataset contains monthly total oi
 
 In this section, we will analyze three datasets that pertain to US exports of Crude oil, Petroleum Products, and Natural Gas, all measured in barrels. Prior to converting the data to tsibble format, we performed data cleaning and formatting. To simplify the data, we converted each dataset to have the same structure, with three columns: date, destination country, and the amount exported. After standardizing the format, we converted each dataset to tsibble format. We then filtered the data to only include countries that are part of the OECD and summarized the results based on the amount exported on each date, removing country names and leaving only the date and amount exported. Finally, we merged all three tsibble tables into one by using the left join function and pivoting the data, resulting in a final time series that represents US exports of the three different products in barrels to OECD countries. The tsibble contains three columns: Date, Export Type, and Amount.
 
-```{r, data_prep, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
+```{r, data_prep, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 library(fpp3)
 library(tidyverse)
 library(ggplot2)
@@ -117,7 +118,7 @@ oecd_europe <- c("Austria", "Belgium", "Czech Republic", "Denmark", "Estonia",
 
 oecd_crude_oil <- ts_crude_oil %>%
   filter(`Destination country` %in% oecd_europe) %>% 
-  filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15")) 
+  filter(Date >= as.Date("2014-04-15"), Date <= as.Date("2023-01-15")) 
 
 oecd_crude_oil_agg <- oecd_crude_oil %>%
   index_by(Date) %>%
@@ -155,7 +156,7 @@ ts_oil_prod <- oil_prod %>%
 
 oecd_oil_prod <- ts_oil_prod %>% 
   filter(`Destination country` %in% oecd_europe) %>% 
-  filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15"))
+  filter(Date >= as.Date("2014-05-15"), Date <= as.Date("2023-01-15"))
 
 
 oecd_oil_prod_agg <- oecd_oil_prod %>%
@@ -250,7 +251,7 @@ ts_nat_gas <- gastemp %>%
 
 oecd_nat_gas <- ts_nat_gas %>%
   filter(`Destination country` %in% oecd_europe) %>% 
-  filter(Date >= as.Date("2010-01-15"), Date <= as.Date("2023-01-15"))
+  filter(Date >= as.Date("2014-05-15"), Date <= as.Date("2023-01-15"))
 
 oecd_nat_gas_agg <- oecd_nat_gas %>%
   index_by(Date) %>%
@@ -290,7 +291,7 @@ Firstly, we will examine a general overview of the three products: US exports of
 
 The graph below reveals significant growth in Crude oil and Natural gas exports since around 2015, with a clear year-on-year increase in both goods, indicating a noticeable trend. Moreover, it appears that the time series for these two products are non-stationary, possibly suggesting the presence of a trend, seasonality, or both. In 2022/2023, Crude oil and Natural gas exports reached their peak, with crude oil almost 60,000 and natural gas around 40,000. Conversely, the time series for Petroleum products appears to be stationary, with a slight increasing trend that may require further analysis.
 
-```{r, time series overview, echo=TRUE, results='markup',warning=FALSE,message=FALSE}
+```{r, time series overview, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 total_exp_oecd %>% ggplot(
  aes(Date,Amount,color = `Export Type`)) +
@@ -306,7 +307,7 @@ Looking at natural gas exports, we can see that the US did not export to OECD co
 
 Finally, looking at petroleum product exports, we can see some fluctuations since 2010, but no clear trend. Seasonality may exist. The changes during COVID-19 and after the Russian invasion were not as significant as in the other two graphs.
 
-```{r, overview by product, echo=TRUE, results='markup',warning=FALSE,message=FALSE}
+```{r, overview by product, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= '#F7F7F7'}
 
 total_exp_oecd %>%  
   ggplot(aes(Date, Amount, color = `Export Type`)) +
@@ -317,7 +318,7 @@ total_exp_oecd %>%
 
 ```
 #### 2.3 Time Series Patterns
-```{r, Seasonal plot for each product, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
+```{r, Seasonal plot for each product, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background='#F7F7F7'}
 # create seasonal plot of total exports monthly of Natural gas
 total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
@@ -355,7 +356,7 @@ On the other hand, the export of petroleum products does not appear to have any 
 
 Overall, analyzing seasonal patterns in the US export of oil products can provide insights into demand patterns and other underlying factors that affect the global oil market.
 
-```{r, seasonal subsidaries plots,box_cox, echo=FALSE, results='markup',warning=FALSE,message=FALSE }
+```{r, seasonal, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #Subseries plots Natural gas
 total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
@@ -391,7 +392,7 @@ In general, the seasonal subseries plots for all three types of oil exports to O
 
 ####2.4 ACF and White Noise
 
-```{r, }
+```{r,Acf and white noise,echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #ACF plot without lag Natural Gas
 
 total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
@@ -439,7 +440,7 @@ Given the nature of the three data sets that are being used: Crude Oil Exports, 
 For Box-Cox transformation to be performed we found lambda for each time series and than use it to transform the time series. 
 
 
-```{r, box_cox, echo=FALSE, results='markup',warning=FALSE,message=FALSE}
+```{r, Box cox transformation, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 lambda1 <- total_exp_oecd %>% 
   filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
@@ -453,6 +454,8 @@ crude_oil_bx <-total_exp_oecd %>%
   index_by(Date) %>% 
   summarise(Total_Exports = sum(Amount)) %>% 
   mutate(Total_Exports = box_cox(Total_Exports + 1, lambda1))
+
+crude_oil_bx
 
 lambda2 <- total_exp_oecd %>% 
   filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
@@ -480,6 +483,7 @@ nat_gas_bx <-total_exp_oecd %>%
   summarise(Total_Exports = sum(Amount)) %>% 
   mutate(Total_Exports = box_cox(Total_Exports + 1, lambda3))
 
+nat_gas_bx <- filter(nat_gas_bx, Date >= as.Date("2016-01-01"))
 ```
   
   
@@ -490,7 +494,7 @@ nat_gas_bx <-total_exp_oecd %>%
 
 ###STL Decomposition
 
-```{r, decomposition, echo=FALSE, results='markup',warning=FALSE,message=FALSE }
+```{r, decomposition, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 dcmp_crude_oil <- crude_oil_bx %>%
   model(stl = STL(Total_Exports))
@@ -515,7 +519,7 @@ components(dcmp_nat_gas)
 ```
 
 
-```{r, decomposition_plots, echo=FALSE, results='markup',warning=FALSE,message=FALSE }
+```{r, Plotting components, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 components(dcmp_crude_oil) %>% autoplot()
 
@@ -542,7 +546,7 @@ After decomposing the data of all three time series and looking at each componen
 
 When choosing from four possible simple forecasting methods the intuition tells us that the most appropriate method in our case is Drift method. Clear trend is seen in both crude oil and natural gas exports data and drift method  allows the forecasts to increase or decrease over time based on the change in the historical data. 
 
-```{r, forecasting plots, models,echo=FALSE, results='markup',warning=FALSE,message=FALSE }
+```{r, Forecasting plots, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 crude_oil_tr <- crude_oil_bx %>% 
   filter(Date >= as.Date("2010-06-01"), Date <= as.Date("2020-06-01"))
@@ -601,8 +605,9 @@ Only looking at plots in Figure [] we can see that our intuition was right and d
 After inspecting data visually we will conduct cross validation to see if our initial predictions that Drift method is most appropriate to forecast both time series was right. 
 
 
-```{r, accuracy ,echo=FALSE, results='markup',warning=FALSE,message=FALSE  }
+```{r, Accuracy of simple forecasting ,echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #Traditional accuracy
+
 
 accuracy1 <- accuracy(crude_oil_fit) %>% 
   arrange(.model) %>% 
@@ -618,7 +623,7 @@ accuracy2
 
 ```
 
-```{r, time series cross validation,echo=FALSE, results='markup',warning=FALSE,message=FALSE  }
+```{r, Time series cross validation,echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #Time series cross validation
 
 crude_oil_tr2 <- crude_oil_bx %>%
@@ -637,22 +642,42 @@ crude_oil_bx |>
 
 #### 4.3. Residual diagnostics
 
-```{r, residual diagnostics,echo=FALSE, results='markup',warning=FALSE,message=FALSE  }
-#Inspecting residuals
+First we inspect residuals of drift and naive methods for crude oil exports.Both, according to previous analysis were most accurate.
+
+```{r, Residual diagnostics (crude oil),echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
+#Inspecting residuals crude oil
 
 drift_crude_oil <- crude_oil_tr %>% 
-  model(NAIVE(Total_Exports))
-
-#All residual diagnostic graphs
-gg_tsresiduals(drift_crude_oil)
-
-
-drift_nat_gas <- nat_gas_tr %>% 
   model(RW(Total_Exports ~ drift()))
 
-gg_tsresiduals(drift_nat_gas)
+naive_crude_oil <- crude_oil_tr %>% 
+  model(NAIVE(Total_Exports))
+
+gg_tsresiduals(drift_crude_oil)
+gg_tsresiduals(naive_crude_oil)
+
 ```
 
+The graphs demonstrate that the naive and drift forecasting methods providecrude oil export predictions that seem to capture all the relevant information available. The residuals, or the differences between the predicted values and actual values, have a mean close to zero and do not show any significant correlation, as evidenced by the lack of discernible patterns in the residual series. The time plot of the residuals indicates that their variance remains relatively constant across the historical data, except for one outlier at the beginning of the time series (which corresponds to the zeros observed during that time period). This constant residual variance is further supported by the histogram of the residuals.
+
+We conduct the same analysis with drift and naive methods on natural gas exports.
+
+```{r, Residual diagnostics (nat gas),echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
+
+#Inspecting residuals nat gas
+
+drift_nat_gas <- nat_gas_bx %>% 
+  model(RW(Total_Exports ~ drift()))
+
+naive_nat_gas <- nat_gas_bx %>% 
+  model(NAIVE(Total_Exports))
+
+gg_tsresiduals(drift_nat_gas)
+gg_tsresiduals(naive_nat_gas)
+
+```
+
+Looking at the graphs we see that in cases of both methods the residuals seem to stay close to zero therefore implying that there is no correlation between the residuals and thus suggesting that the models are accurate in the predictions of the data.
 
 ## 5. Exponential smoothing
 
