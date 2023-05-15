@@ -1,11 +1,15 @@
 ---
 title: "FM project"
 output:
-  html_document:
-  toc: true
+  pdf_document: default
+  toc: yes
   toc_depth: 2
   theme: simplex
   date: "2023-04-25"
+  fig_width: 7
+  fig_height: 6
+  fig_caption: yes
+  html_document: null
 ---
 
 ```{r setup, include=FALSE}
@@ -271,14 +275,16 @@ oecd_merged <- left_join(oecd_nat_gas_agg, oecd_oil_prod_agg, by = "Date") %>%
   left_join(oecd_crude_oil_agg, by = "Date")
 
 total_exp_oecd <- oecd_merged %>%
-  pivot_longer(cols = -Date, names_to = "Export Type", values_to = "Amount")
+  pivot_longer(cols = -Date, names_to = "Export type", values_to = "Amount")
 
 
 total_exp_oecd %>% ggplot(
- aes(Date,Amount,color = `Export Type`)) +
+ aes(Date,Amount,color = `Export type`)) +
    geom_line()+
    labs(x = "Date", y = "Amount")+
-  theme(legend.position = "bottom")
+  scale_color_discrete(name = "") +
+  theme(legend.position = "bottom", legend.box = "horizontal") +
+  guides(color = guide_legend(nrow = 2, ncol = 3))
 
 
 ```
@@ -295,10 +301,14 @@ The graph below reveals significant growth in Crude oil and Natural gas exports 
 ```{r, time series overview, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 total_exp_oecd %>% ggplot(
- aes(Date,Amount,color = `Export Type`)) +
+ aes(Date,Amount,color = `Export type`)) +
    geom_line()+
    labs(x = "Date", y = "Amount")+
-  theme(legend.position = "bottom")
+    scale_color_discrete(name = "") +
+  theme(legend.position = "bottom", legend.box = "horizontal") +
+  guides(color = guide_legend(nrow = 2, ncol = 3))
+
+  
 
 ```
 
@@ -308,20 +318,20 @@ Looking at natural gas exports, we can see that the US did not export to OECD co
 
 Finally, looking at petroleum product exports, we can see some fluctuations since 2010, but no clear trend. Seasonality may exist. The changes during COVID-19 and after the Russian invasion were not as significant as in the other two graphs.
 
-```{r, overview by product, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= '#F7F7F7'}
+```{r, overview by product, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 total_exp_oecd %>%  
-  ggplot(aes(Date, Amount, color = `Export Type`)) +
+  ggplot(aes(Date, Amount, color = `Export type`)) +
   geom_line()+
   labs(x = "Date", y = "Amount")+
   theme(legend.position = "bottom") +
-  facet_wrap(~`Export Type`, ncol = 1)
+  facet_wrap(~`Export type`, ncol = 1)
 
 ```
 #### 2.3 Time Series Patterns
 ```{r, Seasonal plot for each product, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background='#F7F7F7'}
 # create seasonal plot of total exports monthly of Natural gas
-total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+total_exp_oecd %>% filter(`Export type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
   gg_season(Total_Exports) +
@@ -330,7 +340,7 @@ total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>%
   scale_y_continuous(labels = comma_format())
 
 # create seasonal plot of total exports monthly of Crude oil
-total_exp_oecd %>% filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
+total_exp_oecd %>% filter(`Export type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
   gg_season(Total_Exports) +
@@ -339,7 +349,7 @@ total_exp_oecd %>% filter(`Export Type` == "Amount of Crude Oil (Thousand Barrel
   scale_y_continuous(labels = comma_format())
 
 # create seasonal plot of total exports monthly of Petroleum products
-total_exp_oecd %>% filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+total_exp_oecd %>% filter(`Export type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
   gg_season(Total_Exports) +
@@ -359,7 +369,7 @@ Overall, analyzing seasonal patterns in the US export of oil products can provid
 
 ```{r, seasonal, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #Subseries plots Natural gas
-total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+total_exp_oecd %>% filter(`Export type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
   gg_subseries(Total_Exports) + 
@@ -368,7 +378,7 @@ total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>%
   scale_y_continuous(labels = comma_format())
 
 #Subseries plots Crude oil
-total_exp_oecd %>% filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
+total_exp_oecd %>% filter(`Export type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
   gg_subseries(Total_Exports) + 
@@ -377,7 +387,7 @@ total_exp_oecd %>% filter(`Export Type` == "Amount of Crude Oil (Thousand Barrel
   scale_y_continuous(labels = comma_format())
 
 #Subseries plots Petroleum products
-total_exp_oecd %>% filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+total_exp_oecd %>% filter(`Export type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
   gg_subseries(Total_Exports) + 
@@ -396,21 +406,21 @@ In general, the seasonal subseries plots for all three types of oil exports to O
 ```{r,Acf and white noise,echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #ACF plot without lag Natural Gas
 
-total_exp_oecd %>% filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+total_exp_oecd %>% filter(`Export type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
   ACF() %>%  autoplot()
 
 #ACF plot without lag Crude Oil
 
-total_exp_oecd %>% filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
+total_exp_oecd %>% filter(`Export type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
   ACF() %>%  autoplot()
 
 #ACF plot without lag Petroleum
 
-total_exp_oecd %>% filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+total_exp_oecd %>% filter(`Export type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(`Amount`)) %>% 
   ACF() %>%  autoplot()
@@ -444,14 +454,14 @@ For Box-Cox transformation to be performed we found lambda for each time series 
 ```{r, Box cox transformation, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 lambda1 <- total_exp_oecd %>% 
-  filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
+  filter(`Export type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(Amount)) %>% 
   features(Total_Exports, features = guerrero) %>% 
   pull(lambda_guerrero)
 
 crude_oil_bx <-total_exp_oecd %>% 
-  filter(`Export Type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
+  filter(`Export type` == "Amount of Crude Oil (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(Amount)) %>% 
   mutate(Total_Exports = box_cox(Total_Exports + 1, lambda1))
@@ -459,27 +469,27 @@ crude_oil_bx <-total_exp_oecd %>%
 crude_oil_bx
 
 lambda2 <- total_exp_oecd %>% 
-  filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+  filter(`Export type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(Amount)) %>% 
   features(Total_Exports, features = guerrero) %>% 
   pull(lambda_guerrero)
 
 pet_prod_bx <-total_exp_oecd %>% 
-  filter(`Export Type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
+  filter(`Export type` == "Amount of total Petroleum Porducts (Thousand Barrels)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(Amount)) %>% 
   mutate(Total_Exports = box_cox(Total_Exports + 1, lambda2))
 
 lambda3 <- total_exp_oecd %>% 
-  filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+  filter(`Export type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(Amount)) %>% 
   features(Total_Exports, features = guerrero) %>% 
   pull(lambda_guerrero)
 
 nat_gas_bx <-total_exp_oecd %>% 
-  filter(`Export Type` == "Amount of Natural gas (BOE)") %>% 
+  filter(`Export type` == "Amount of Natural gas (BOE)") %>% 
   index_by(Date) %>% 
   summarise(Total_Exports = sum(Amount)) %>% 
   mutate(Total_Exports = box_cox(Total_Exports + 1, lambda3))
