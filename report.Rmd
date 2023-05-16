@@ -7,9 +7,10 @@ output:
   theme: simplex
   date: "2023-04-25"
   fig_width: 7
-  fig_height: 6
-  fig_caption: yes
+  fig_height: 6  
+  fig_caption: true
   html_document: null
+
 ---
 
 ```{r setup, include=FALSE}
@@ -22,11 +23,13 @@ Reads
 https://www.eia.gov/todayinenergy/detail.php?id=55920#:~:text=Europe%20became%20the%20primary%20destination,U.S.%20LNG%20exports%20to%20Europe.
 
 
-## Analysing U.S. energy exports
+## Analysing U.S. energy exports  
+  
 
 
-### 1.Introduction 
-
+### 1.Introduction  
+  
+  
 Energy commodities play a pivotal role in the global economy, as they are essential for economic growth and development. They are required for transportation, manufacturing, heating, cooling, and many other critical activities that drive economic activity. 
 
 The production, consumption, and trade of energy commodities have significant impacts on the global economy. The prices of energy commodities are influenced by supply and demand factors, geopolitical tensions, weather events, and technological advances.
@@ -35,29 +38,32 @@ The recent COVID-19 pandemic and the war in Ukraine have created unprecedented c
 
 OECD Europe was selected as the region, as because of geographical and historical relations it was most influenced region by the Russian war on Ukraine. The United States has been chosen as the focus because it is one of the leading producers and exporters of energy commodities, and its export trends have significant implications for the global energy market. Moreover, the United States serves as a significant alternative for OECD Europe countries to turn to after the imposition of sanctions on Russia.
 
-In this study, we will analyze the impact of the war in Ukraine on US energy exports to OECD Europe. Specifically, we will focus on three main energy products: crude oil, petroleum products, and natural gas. By examining trends in these exports, we can better understand how the geopolitical events in Ukraine have affected the energy market in Europe. Additionally, we will investigate changes in OECD Europe's dependence on Russian gas to see how energy dynamics in the region have shifted. 
-
-
-
-
-### 2. Time Series Graphics
-
-In this section of the report, we will be creating time series graphics using various techniques such as time plots, seasonal plots, seasonal subseries plots, and ACF(). These plots will provide insights into the different time series in the dataset and help us understand their characteristics, such as seasonality, trend, and cyclicity. We will also look for unusual observations and changing patterns over time and explore the differences between the series in terms of these features. Additionally, for this analysis, we have decided to focus on three specific time series: US exports of Natural Gas to OECD, US Exports of Crude Oil to OECD, and US exports of Petroleum products to OECD. We will create the same types of graphs for all of these time series, including time plots, seasonal plots, seasonal subseries plots, and ACF plots. These time series span the last ten years from 2013 to 2023. Through these analyses, we aim to gain insights into the seasonality, cyclicity, trend, unusual observations, changing patterns, and differences between these time series, and determine if any of the series resemble a white noise process. By analyzing these time series graphics, we can gain a better understanding of the data and identify any potential patterns or anomalies that may exist within it.
-
-
-
-#### 2.1 Dataset
-
-
-The data sets utilized in this study consist of monthly observations of Country’s reliance on Russian oil products, USA’s natural gas exports by country, USA’s total crude oil exports by destination, and USA’s petroleum products exports by destination.
-
-
-Our primary source of data is the U.S. Energy Information Administration (EIA), an independent organization that collects, analyzes, and disseminates data and information related to energy production, consumption, and distribution in the United States. Also, for the purpose of this study we are using data from the International Energy Agency (IEA), which  is an intergovernmental organization that was established in 1974 to promote global cooperation on energy issues. 
-
-In case of data on reliance on Russian Oil the dataset contains monthly total oil imports from Russia as a percentage of total oil imports for a selected group of European countries belonging to the Organization for Economic Co-operation and Development (OECD) from January 1990 to October 2022. The dataset includes the date, country name, and the percentage of total oil imports that came from Russia for each observation. 
-
-In this section, we will analyze three datasets that pertain to US exports of Crude oil, Petroleum Products, and Natural Gas, all measured in barrels. Prior to converting the data to tsibble format, we performed data cleaning and formatting. To simplify the data, we converted each dataset to have the same structure, with three columns: date, destination country, and the amount exported. After standardizing the format, we converted each dataset to tsibble format. We then filtered the data to only include countries that are part of the OECD and summarized the results based on the amount exported on each date, removing country names and leaving only the date and amount exported. Finally, we merged all three tsibble tables into one by using the left join function and pivoting the data, resulting in a final time series that represents US exports of the three different products in barrels to OECD countries. The tsibble contains three columns: Date, Export Type, and Amount.
-
+In this study, we will analyze the impact of the war in Ukraine on US energy exports to OECD Europe. Specifically, we will focus on three main energy products: crude oil, petroleum products, and natural gas. By examining trends in these exports, we can better understand how the geopolitical events in Ukraine have affected the energy market in Europe. Additionally, we will investigate changes in OECD Europe's dependence on Russian gas to see how energy dynamics in the region have shifted.   
+  
+    
+    
+        
+    
+    
+### 2. Time Series Graphics      
+  
+In this section of the report, we will be creating time series graphics using various techniques such as time plots, seasonal plots, seasonal subseries plots, and ACF(). These plots will provide insights into the different time series in the dataset and help us understand their characteristics, such as seasonality, trend, and cyclicity. We will also look for unusual observations and changing patterns over time and explore the differences between the series in terms of these features. Additionally, for this analysis, we have decided to focus on three specific time series: US exports of Natural Gas to OECD, US Exports of Crude Oil to OECD, and US exports of Petroleum products to OECD. We will create the same types of graphs for all of these time series, including time plots, seasonal plots, seasonal subseries plots, and ACF plots. These time series span the last ten years from 2013 to 2023. Through these analyses, we aim to gain insights into the seasonality, cyclicity, trend, unusual observations, changing patterns, and differences between these time series, and determine if any of the series resemble a white noise process. By analyzing these time series graphics, we can gain a better understanding of the data and identify any potential patterns or anomalies that may exist within it.  
+  
+  
+  
+#### 2.1 Dataset  
+  
+  
+The data sets utilized in this study consist of monthly observations of Country’s reliance on Russian oil products, USA’s natural gas exports by country, USA’s total crude oil exports by destination, and USA’s petroleum products exports by destination.  
+  
+Our primary source of data is the U.S. Energy Information Administration (EIA), an independent organization that collects, analyzes, and disseminates data and information related to energy production, consumption, and distribution in the United States. Also, for the purpose of this study we are using data from the International Energy Agency (IEA), which  is an intergovernmental organization that was established in 1974 to promote global cooperation on energy issues.   
+  
+In case of data on reliance on Russian Oil the dataset contains monthly total oil imports from Russia as a percentage of total oil imports for a selected group of European countries belonging to the Organization for Economic Co-operation and Development (OECD) from January 1990 to October 2022. The dataset includes the date, country name, and the percentage of total oil imports that came from Russia for each observation.   
+  
+In this section, we will analyze three datasets that pertain to US exports of Crude oil, Petroleum Products, and Natural Gas, all measured in barrels. Prior to converting the data to tsibble format, we performed data cleaning and formatting. To simplify the data, we converted each dataset to have the same structure, with three columns: date, destination country, and the amount exported. After standardizing the format, we converted each dataset to tsibble format. We then filtered the data to only include countries that are part of the OECD and summarized the results based on the amount exported on each date, removing country names and leaving only the date and amount exported. Finally, we merged all three tsibble tables into one by using the left join function and pivoting the data, resulting in a final time series that represents US exports of the three different products in barrels to OECD countries. The tsibble contains three columns: Date, Export Type, and Amount.  
+  
+   
+       
 ```{r, data_prep, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 library(fpp3)
 library(tidyverse)
@@ -289,15 +295,15 @@ total_exp_oecd %>% ggplot(
 
 ```
 **Comment on Nat Gas export zeros**
-
-#### 2.2 Time Series Plots
-
-Firstly, we will examine a general overview of the three products: US exports of Crude Oil, Petroleum Products, and Natural Gas to OECD countries in barrels over the last ten years. This analysis will provide us with an understanding of the overall trend and magnitude of the exports. By examining the trend, we can identify any significant changes in the exports over the years and evaluate the magnitude to determine which product has the highest export value. This overview will be a crucial step before we dive deeper into the individual time series of each product.
-
-#### Including Plots
-
-The graph below reveals significant growth in Crude oil and Natural gas exports since around 2015, with a clear year-on-year increase in both goods, indicating a noticeable trend. Moreover, it appears that the time series for these two products are non-stationary, possibly suggesting the presence of a trend, seasonality, or both. In 2022/2023, Crude oil and Natural gas exports reached their peak, with crude oil almost 60,000 and natural gas around 40,000. Conversely, the time series for Petroleum products appears to be stationary, with a slight increasing trend that may require further analysis.
-
+  
+#### 2.2 Time Series Plots   
+  
+Firstly, we will examine a general overview of the three products: US exports of Crude Oil, Petroleum Products, and Natural Gas to OECD countries in barrels over the last ten years. This analysis will provide us with an understanding of the overall trend and magnitude of the exports. By examining the trend, we can identify any significant changes in the exports over the years and evaluate the magnitude to determine which product has the highest export value. This overview will be a crucial step before we dive deeper into the individual time series of each product.  
+  
+#### 2.3 Including Plots   
+  
+The graph below reveals significant growth in Crude oil and Natural gas exports since around 2015, with a clear year-on-year increase in both goods, indicating a noticeable trend. Moreover, it appears that the time series for these two products are non-stationary, possibly suggesting the presence of a trend, seasonality, or both. In 2022/2023, Crude oil and Natural gas exports reached their peak, with crude oil almost 60,000 and natural gas around 40,000. Conversely, the time series for Petroleum products appears to be stationary, with a slight increasing trend that may require further analysis.  
+  
 ```{r, time series overview, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 total_exp_oecd %>% ggplot(
@@ -311,13 +317,16 @@ total_exp_oecd %>% ggplot(
   
 
 ```
-
-In the graph below, we have plotted each exported product separately to provide a better picture of each time series. The data shows that crude oil exports began in 2016 with lower amounts initially, but within a few years, exports boomed. Since 2016, there has been a significant positive trend, possibly with seasonality. In 2020, crude oil exports reached a peak of around 50,000 barrels. Then, due to the COVID-19 pandemic, exports decreased for two years. However, in the beginning of 2022, exports increased significantly, most likely due to the Russian invasion in Ukraine. Currently, exports of crude oil are at a peak, reaching almost 60,000 barrels.
-
-Looking at natural gas exports, we can see that the US did not export to OECD countries until after 2016, when low amounts of natural gas were first exported. In 2018, exports increased significantly, reaching their first peak in 2020. We can see a similar positive trend and possible seasonality as in the crude oil graph. During the COVID-19 pandemic, exports decreased significantly, but again, after the Russian invasion, exports increased significantly, reaching 40,000 barrels. This suggests that OECD countries stopped buying natural gas from Russia.
-
-Finally, looking at petroleum product exports, we can see some fluctuations since 2010, but no clear trend. Seasonality may exist. The changes during COVID-19 and after the Russian invasion were not as significant as in the other two graphs.
-
+  
+    
+In the graph below, we have plotted each exported product separately to provide a better picture of each time series. The data shows that crude oil exports began in 2016 with lower amounts initially, but within a few years, exports boomed. Since 2016, there has been a significant positive trend, possibly with seasonality. In 2020, crude oil exports reached a peak of around 50,000 barrels. Then, due to the COVID-19 pandemic, exports decreased for two years. However, in the beginning of 2022, exports increased significantly, most likely due to the Russian invasion in Ukraine. Currently, exports of crude oil are at a peak, reaching almost 60,000 barrels.  
+  
+      
+Looking at natural gas exports, we can see that the US did not export to OECD countries until after 2016, when low amounts of natural gas were first exported. In 2018, exports increased significantly, reaching their first peak in 2020. We can see a similar positive trend and possible seasonality as in the crude oil graph. During the COVID-19 pandemic, exports decreased significantly, but again, after the Russian invasion, exports increased significantly, reaching 40,000 barrels. This suggests that OECD countries stopped buying natural gas from Russia.  
+  
+Finally, looking at petroleum product exports, we can see some fluctuations since 2010, but no clear trend. Seasonality may exist. The changes during COVID-19 and after the Russian invasion were not as significant as in the other two graphs.  
+  
+    
 ```{r, overview by product, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 total_exp_oecd %>%  
@@ -328,7 +337,8 @@ total_exp_oecd %>%
   facet_wrap(~`Export type`, ncol = 1)
 
 ```
-#### 2.3 Time Series Patterns
+#### 2.4 Time Series Patterns  
+  
 ```{r, Seasonal plot for each product, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background='#F7F7F7'}
 # create seasonal plot of total exports monthly of Natural gas
 total_exp_oecd %>% filter(`Export type` == "Amount of Natural gas (BOE)") %>% 
@@ -357,16 +367,17 @@ total_exp_oecd %>% filter(`Export type` == "Amount of total Petroleum Porducts (
   ggtitle("Seasonal plot: US exports of Petroleum to OECD") +
   scale_y_continuous(labels = comma_format())
 ```
-To further elaborate, the data analysis of US exports of oil products to OECD shows that seasonal patterns can differ depending on the type of product being exported. While natural gas and crude oil both display some level of seasonality, petroleum products do not show any significant trends.
-
-In the case of natural gas, we can see a clear increase in exports during the colder months, which could be due to increased demand for heating purposes. Conversely, during the warmer months, exports tend to decrease. This pattern is consistent throughout the years, with the exception of some yearly fluctuations.
-
+  
+To further elaborate, the data analysis of US exports of oil products to OECD shows that seasonal patterns can differ depending on the type of product being exported. While natural gas and crude oil both display some level of seasonality, petroleum products do not show any significant trends.  
+  
+In the case of natural gas, we can see a clear increase in exports during the colder months, which could be due to increased demand for heating purposes. Conversely, during the warmer months, exports tend to decrease. This pattern is consistent throughout the years, with the exception of some yearly fluctuations.  
+  
 Regarding crude oil, the seasonal pattern is not as clear as with natural gas. However, we still observe a similar trend where exports tend to increase during the colder months and decrease during the warmer months. Interestingly, we see a deviation from this pattern in 2022, with exports remaining high even during spring and summer months. This could be attributed to the political tensions caused by the Russian invasion in Ukraine.
 
-On the other hand, the export of petroleum products does not appear to have any notable seasonal patterns. While there may be a slight increase towards the end of each year, there is no clear trend observed year-over-year.
-
-Overall, analyzing seasonal patterns in the US export of oil products can provide insights into demand patterns and other underlying factors that affect the global oil market.
-
+On the other hand, the export of petroleum products does not appear to have any notable seasonal patterns. While there may be a slight increase towards the end of each year, there is no clear trend observed year-over-year.  
+  
+Overall, analyzing seasonal patterns in the US export of oil products can provide insights into demand patterns and other underlying factors that affect the global oil market.  
+    
 ```{r, seasonal, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #Subseries plots Natural gas
 total_exp_oecd %>% filter(`Export type` == "Amount of Natural gas (BOE)") %>% 
@@ -395,14 +406,16 @@ total_exp_oecd %>% filter(`Export type` == "Amount of total Petroleum Porducts (
   ggtitle("Subseries plot: US exports of Petroleum Products")+
   scale_y_continuous(labels = comma_format())
 ```
-To gain a better understanding of seasonality, we created additional plots known as subseries seasonal plots. These graphs provide a clearer view of monthly exports and also display the means over each month for the analyzed time series period.
-
-When we look at the subseries seasonal plot for natural gas exports, we can see a clear seasonality of increased natural gas exports during the colder seasons, starting from September and decreasing in spring. From the crude oil subseries seasonal plot, we can notice a huge increase in December and January as well, indicating that these months have a strong seasonal effect on crude oil exports. Finally, from the subseries seasonal plot of Petroleum products, we can notice the same increase in December, but there is a huge decrease in February and March. All other months are fluctuating more randomly without displaying any clear seasonality.
-
-In general, the seasonal subseries plots for all three types of oil exports to OECD reveal similar patterns to those seen in the seasonal plots. There is a clear increase in exports during the colder seasons, particularly in December and January, and a decrease during the warmer seasons. However, there are some fluctuations and irregularities throughout the year that do not follow a clear seasonal pattern.
-
-####2.4 ACF and White Noise
-
+  
+To gain a better understanding of seasonality, we created additional plots known as subseries seasonal plots. These graphs provide a clearer view of monthly exports and also display the means over each month for the analyzed time series period.  
+  
+When we look at the subseries seasonal plot for natural gas exports, we can see a clear seasonality of increased natural gas exports during the colder seasons, starting from September and decreasing in spring. From the crude oil subseries seasonal plot, we can notice a huge increase in December and January as well, indicating that these months have a strong seasonal effect on crude oil exports. Finally, from the subseries seasonal plot of Petroleum products, we can notice the same increase in December, but there is a huge decrease in February and March. All other months are fluctuating more randomly without displaying any clear seasonality.  
+  
+In general, the seasonal subseries plots for all three types of oil exports to OECD reveal similar patterns to those seen in the seasonal plots. There is a clear increase in exports during the colder seasons, particularly in December and January, and a decrease during the warmer seasons. However, there are some fluctuations and irregularities throughout the year that do not follow a clear seasonal pattern.  
+  
+####2.5 ACF and White Noise   
+  
+  
 ```{r,Acf and white noise,echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #ACF plot without lag Natural Gas
 
@@ -426,31 +439,31 @@ total_exp_oecd %>% filter(`Export type` == "Amount of total Petroleum Porducts (
   ACF() %>%  autoplot()
 
 ```
-
-The autocorrelation function (ACF) plot displays the correlation between a time series and its own lagged values. A high ACF value for a particular lag indicates that the current values of the time series are significantly correlated with the past values at that lag.
-
-The ACF plots for US exports of Natural Gas, Crude Oil to OECD reveal interesting insights regarding the seasonality and trends in the time series. In the case of Natural Gas and Crude Oil, the ACF plots demonstrate a significant positive correlation, indicating the presence of high trend component with slight seasonality patterns observed as. However, these plots reflect a dominant upward trend, as evidenced by the substantial increase in exports. The trend component seems to be overtaking the seasonality, suggesting that the overall upward trend in exports is more prominent than the periodic variation in the data.
-
-The ACF plot for US exports of Petroleum Products to OECD indicates that there is no noticeable seasonality in the time series. The first three lags show significant positive correlations, suggesting some short-term dependence between current exports and those from 1 to 3 months ago. However, beyond the third lag, the ACF values fall within the confidence interval, indicating a weakening of the correlation. This suggests that there is no clear and consistent pattern of seasonality in the exports of petroleum products.
-
-Finally, based on the ACF plots of the US exports of natural gas, crude oil, and petroleum products to OECD, we can conclude that the time series do not appear to be white noise. 
-
-
-### 3. Time series decomposition
-#### 3.1. Adjustments
-
-
-After a thorough review of the data, we determined that no adjustments were necessary. We did not observe any calendar or population effects on the monthly exports data, and the exports data is already presented in barrels or barrels of oil equivalent (BOE), so no inflation adjustments were required.
-
-
-#### 3.2. Transformations
-
-
-Given the nature of the three data sets that are being used: Crude Oil Exports, Petroleum exports and Natural gas exports we decided that certain transformations might be necessary for further analysis. Not normal distribution of the data and differing variance were seen as potential threat for correct conclusions. We identified Box-Cox transformation as necessary to continue since it stabilizes the variance of the data and makes the distribution more normal. This will  improve the reliability of the statistical tests and provide more accurate results. 
-
-For Box-Cox transformation to be performed we found lambda for each time series and than use it to transform the time series. 
-
-
+  
+The autocorrelation function (ACF) plot displays the correlation between a time series and its own lagged values. A high ACF value for a particular lag indicates that the current values of the time series are significantly correlated with the past values at that lag.  
+  
+The ACF plots for US exports of Natural Gas, Crude Oil to OECD reveal interesting insights regarding the seasonality and trends in the time series. In the case of Natural Gas and Crude Oil, the ACF plots demonstrate a significant positive correlation, indicating the presence of high trend component with slight seasonality patterns observed as. However, these plots reflect a dominant upward trend, as evidenced by the substantial increase in exports. The trend component seems to be overtaking the seasonality, suggesting that the overall upward trend in exports is more prominent than the periodic variation in the data.  
+  
+The ACF plot for US exports of Petroleum Products to OECD indicates that there is no noticeable seasonality in the time series. The first three lags show significant positive correlations, suggesting some short-term dependence between current exports and those from 1 to 3 months ago. However, beyond the third lag, the ACF values fall within the confidence interval, indicating a weakening of the correlation. This suggests that there is no clear and consistent pattern of seasonality in the exports of petroleum products.  
+  
+Finally, based on the ACF plots of the US exports of natural gas, crude oil, and petroleum products to OECD, we can conclude that the time series do not appear to be white noise.     
+  
+  
+### 3. Time series decomposition   
+  
+#### 3.1. Adjustments   
+  
+  
+After a thorough review of the data, we determined that no adjustments were necessary. We did not observe any calendar or population effects on the monthly exports data, and the exports data is already presented in barrels or barrels of oil equivalent (BOE), so no inflation adjustments were required.  
+  
+  
+#### 3.2. Transformations  
+  
+  
+Given the nature of the three data sets that are being used: Crude Oil Exports, Petroleum exports and Natural gas exports we decided that certain transformations might be necessary for further analysis. Not normal distribution of the data and differing variance were seen as potential threat for correct conclusions. We identified Box-Cox transformation as necessary to continue since it stabilizes the variance of the data and makes the distribution more normal. This will  improve the reliability of the statistical tests and provide more accurate results.   
+  
+For Box-Cox transformation to be performed we found lambda for each time series and than use it to transform the time series.    
+  
 ```{r, Box cox transformation, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 lambda1 <- total_exp_oecd %>% 
@@ -497,14 +510,11 @@ nat_gas_bx <-total_exp_oecd %>%
 nat_gas_bx <- filter(nat_gas_bx, Date >= as.Date("2016-01-01"))
 ```
   
+#### 3.3 Decomposition  
   
   
+### 3.4 STL Decomposition   
   
-#### 3.3. Decomposition
-
-
-###STL Decomposition
-
 ```{r, decomposition, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 dcmp_crude_oil <- crude_oil_bx %>%
@@ -528,8 +538,8 @@ components(dcmp_nat_gas)
 
 
 ```
-
-
+  
+  
 ```{r, Plotting components, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 components(dcmp_crude_oil) %>% autoplot()
@@ -538,25 +548,25 @@ components(dcmp_oil_prod) %>% autoplot()
 
 components(dcmp_nat_gas) %>% autoplot()
 ```
-
-We used STL decomposition to decompose the Box-Cox transformed time series into three components: trend, seasonal, and residual. Four graphs were plotted, three of which display the trend, seasonal, and residual components, respectively while fourth one, the one at the top, represent the export amounts from 2013 to 2023.
-
-Looking at the graphs we see that in case of natural gas exports actual patterns can only be seen appearing after approximately 2016 when the U.S.
-
-There are several conclusions to be drawn looking at the STL decomposition. First of all, we can see clear trend in exports of crude oil and natural gas while petroleum products does not have clear trend. In both cases of exports of crude oil and natural gas we can clearly see slight drops in exports after 2020 which can be explained by COVID 19 pandemic and continued growths after situation normalized. Another observation worth mentioning is the fact that exports of two mentioned products hits all time high around the year 2022. This can be explained by huge declines of both products from Russia after sanction were imposed. 
-
-
-Moreover, we can see seasonality in exports of all three products.That is no surprise, given that all energy products are highly reactive to different seasons.
-
-After decomposing the data of all three time series and looking at each components separately we decided that exports of petroleum products will not be analysed further. Exports of petroleum products to OECD Europe markets does not have clear trend therefore indicating that Russian invasion in Ukraine did not have positive effect on growing imports from US. This can be explained by the fact that embargo on refined oil products from EU 27 was introduced as of 5 February 2023. Therefore, Russian war on Ukraine and sanctions on Russia that followed did not have any visible effect on US exports of petroleum products to OECD Europe markets.   
-
-
-## 4. The forecaster’s toolbox
-
-#### 4.1. Finding the fit
-
-When choosing from four possible simple forecasting methods the intuition tells us that the most appropriate method in our case is Drift method. Clear trend is seen in both crude oil and natural gas exports data and drift method  allows the forecasts to increase or decrease over time based on the change in the historical data. 
-
+  
+We used STL decomposition to decompose the Box-Cox transformed time series into three components: trend, seasonal, and residual. Four graphs were plotted, three of which display the trend, seasonal, and residual components, respectively while fourth one, the one at the top, represent the export amounts from 2013 to 2023.  
+  
+Looking at the graphs we see that in case of natural gas exports actual patterns can only be seen appearing after approximately 2016 when the U.S.  
+  
+There are several conclusions to be drawn looking at the STL decomposition. First of all, we can see clear trend in exports of crude oil and natural gas while petroleum products does not have clear trend. In both cases of exports of crude oil and natural gas we can clearly see slight drops in exports after 2020 which can be explained by COVID 19 pandemic and continued growths after situation normalized. Another observation worth mentioning is the fact that exports of two mentioned products hits all time high around the year 2022. This can be explained by huge declines of both products from Russia after sanction were imposed.    
+  
+  
+Moreover, we can see seasonality in exports of all three products.That is no surprise, given that all energy products are highly reactive to different seasons.  
+  
+After decomposing the data of all three time series and looking at each components separately we decided that exports of petroleum products will not be analysed further. Exports of petroleum products to OECD Europe markets does not have clear trend therefore indicating that Russian invasion in Ukraine did not have positive effect on growing imports from US. This can be explained by the fact that embargo on refined oil products from EU 27 was introduced as of 5 February 2023. Therefore, Russian war on Ukraine and sanctions on Russia that followed did not have any visible effect on US exports of petroleum products to OECD Europe markets.     
+  
+  
+## 4. The forecaster’s toolbox   
+  
+#### 4.1. Finding the fit    
+  
+When choosing from four possible simple forecasting methods the intuition tells us that the most appropriate method in our case is Drift method. Clear trend is seen in both crude oil and natural gas exports data and drift method  allows the forecasts to increase or decrease over time based on the change in the historical data.    
+  
 ```{r, Forecasting plots, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 crude_oil_tr <- crude_oil_bx %>% 
@@ -610,12 +620,12 @@ nat_gas_fc %>%
   guides(colour = guide_legend(title = "Forecast"))
 
 ```
-
-Only looking at plots in Figure [] we can see that our intuition was right and drift method still seems as most appropriate after conducting visual inspection. Though, it is important to highlight that if in case of crude oil exports Drift method was actually quite good at forecasting export amounts, in the case of natural gas exports Drift method looked as best of all but still quite far away from actual data. The important takeaway at this point is the fact that the average growth rate calculated from historical data was strongly effected by dropped exports during the COVID pandemic. 
-
-After inspecting data visually we will conduct cross validation to see if our initial predictions that Drift method is most appropriate to forecast both time series was right. 
-
-
+  
+Only looking at plots in Figure [] we can see that our intuition was right and drift method still seems as most appropriate after conducting visual inspection. Though, it is important to highlight that if in case of crude oil exports Drift method was actually quite good at forecasting export amounts, in the case of natural gas exports Drift method looked as best of all but still quite far away from actual data. The important takeaway at this point is the fact that the average growth rate calculated from historical data was strongly effected by dropped exports during the COVID pandemic.   
+  
+After inspecting data visually we will conduct cross validation to see if our initial predictions that Drift method is most appropriate to forecast both time series was right.   
+  
+  
 ```{r, Accuracy of simple forecasting ,echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #Traditional accuracy
 
@@ -633,7 +643,7 @@ accuracy2 <- accuracy(nat_gas_fit) %>%
 accuracy2
 
 ```
-
+  
 ```{r, Time series cross validation,echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #Time series cross validation
 
@@ -650,11 +660,12 @@ crude_oil_bx |>
   model(RW(Total_Exports ~ drift())) |>
   accuracy()
 ```
-
-#### 4.3. Residual diagnostics
-
-First we inspect residuals of drift and naive methods for crude oil exports.Both, according to previous analysis were most accurate.
-
+  
+#### 4.2. Residual diagnostics   
+  
+    
+First we inspect residuals of drift and naive methods for crude oil exports.Both, according to previous analysis were most accurate.  
+  
 ```{r, Residual diagnostics (crude oil),echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #Inspecting residuals crude oil
 
@@ -668,11 +679,11 @@ gg_tsresiduals(drift_crude_oil)
 gg_tsresiduals(naive_crude_oil)
 
 ```
-
-The graphs demonstrate that the naive and drift forecasting methods providecrude oil export predictions that seem to capture all the relevant information available. The residuals, or the differences between the predicted values and actual values, have a mean close to zero and do not show any significant correlation, as evidenced by the lack of discernible patterns in the residual series. The time plot of the residuals indicates that their variance remains relatively constant across the historical data, except for one outlier at the beginning of the time series (which corresponds to the zeros observed during that time period). This constant residual variance is further supported by the histogram of the residuals.
-
-We conduct the same analysis with drift and naive methods on natural gas exports.
-
+  
+The graphs demonstrate that the naive and drift forecasting methods providecrude oil export predictions that seem to capture all the relevant information available. The residuals, or the differences between the predicted values and actual values, have a mean close to zero and do not show any significant correlation, as evidenced by the lack of discernible patterns in the residual series. The time plot of the residuals indicates that their variance remains relatively constant across the historical data, except for one outlier at the beginning of the time series (which corresponds to the zeros observed during that time period). This constant residual variance is further supported by the histogram of the residuals.  
+  
+We conduct the same analysis with drift and naive methods on natural gas exports.  
+  
 ```{r, Residual diagnostics (nat gas),echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 #Inspecting residuals nat gas
@@ -687,11 +698,11 @@ gg_tsresiduals(drift_nat_gas)
 gg_tsresiduals(naive_nat_gas)
 
 ```
-
-Looking at the graphs we see that in cases of both methods the residuals seem to stay close to zero therefore implying that there is no correlation between the residuals and thus suggesting that the models are accurate in the predictions of the data.
-
-## 5. Exponential smoothing
-
+  
+Looking at the graphs we see that in cases of both methods the residuals seem to stay close to zero therefore implying that there is no correlation between the residuals and thus suggesting that the models are accurate in the predictions of the data.  
+  
+## 5. Exponential smoothing   
+  
 Yet to be started
 
 ## 6. ARIMA
