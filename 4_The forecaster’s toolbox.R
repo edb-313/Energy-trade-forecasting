@@ -2,12 +2,12 @@
 
 ########################### Crude Oil Exports ###################################
 
-crude_oil_agg %>% 
+oecd_crude_oil_agg %>% 
   autoplot(`Amount of Crude Oil (Thousand Barrels)`)
 
 #fiting the models
 
-crude_oil_fit <- crude_oil_agg %>% 
+crude_oil_fit <- oecd_crude_oil_agg %>% 
   model(
     Seasonal_naive = SNAIVE(`Amount of Crude Oil (Thousand Barrels)`),
     Naive = NAIVE(`Amount of Crude Oil (Thousand Barrels)`),
@@ -28,7 +28,7 @@ crude_oil_fc %>%
 #plotting all forecasting models against historical data
 
 crude_oil_fc %>% 
-  autoplot(crude_oil_agg, level = NULL) +
+  autoplot(oecd_crude_oil_agg, level = NULL) +
   ggtitle("Forecasts for U.S. Crude Oil exports to OECD Europe") +
   xlab("Year") + ylab("Thousand Barrels") +
   guides(colour = guide_legend(title = "Forecast"))
@@ -115,7 +115,7 @@ oecd_crude_oil_agg
 
 #creating a training data set
 
-crude_oil_train <- crude_oil_agg %>% 
+crude_oil_train <- oecd_crude_oil_agg %>% 
   filter(Date >= as.Date("2015-06-01"), Date <= as.Date("2021-06-01"))
 
 #fiting all four models
@@ -143,7 +143,7 @@ accuracy(crude_oil_fit) %>%
 
 crude_oil_fc %>% 
   autoplot(
-    crude_oil_agg,
+    oecd_crude_oil_agg,
     level = NULL
   ) +
   labs(
@@ -293,10 +293,10 @@ nat_gas_train
 
 nat_gas_fit <- nat_gas_train %>% 
   model(
-    Mean = MEAN(`Amount of Natural gas (MMcf)`),
-    Naive = NAIVE(`Amount of Natural gas (MMcf)`),
-    SNaive = SNAIVE(`Amount of Natural gas (MMcf)`),
-    Drift = RW(`Amount of Natural gas (MMcf)` ~ drift())
+    Mean = MEAN(`Amount of Natural gas (BOE)`),
+    Naive = NAIVE(`Amount of Natural gas (BOE)`),
+    SNaive = SNAIVE(`Amount of Natural gas (BOE)`),
+    Drift = RW(`Amount of Natural gas (BOE)` ~ drift())
   )
 
 nat_gas_fit
