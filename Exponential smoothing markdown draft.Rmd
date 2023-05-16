@@ -70,13 +70,15 @@ Within this section, we will explore various techniques and methodologies, such 
 #determining best ETS model
 fit<-crude_oil_agg %>% 
   model(
-    additive=ETS(Total_Exports~error("A")+trend("A")+season("A")),
-    multiplicative = ETS(Total_Exports ~ error("M") + trend("M") + season("M")),
-    random1 = ETS(Total_Exports ~ error("M") + trend("A") + season("A")),
+    additive_ETS=ETS(Total_Exports~error("A")+trend("A")+season("A")),
+    multiplicative_ETS = ETS(Total_Exports ~ error("M") + trend("M") + season("M")),
+    random1_ETS = ETS(Total_Exports ~ error("M") + trend("A") + season("A")),
   )
 
 #checking accuracy
 accuracy(fit) 
+
+addi_FC<-fit %>% select(additive) %>% forecast(h=36)
 
 addi_FC %>% 
   autoplot(
@@ -105,7 +107,8 @@ Considering these metrics, the additive model demonstrated superior performance 
 #ETS model selection by R
 crude_fit <- crude_oil_agg %>%
   model(auto_crude_ets = ETS(Total_Exports))
-#checking the accuracy
+#checking the accuracy and properties
+accuracy(crude_fit)
 report(crude_fit)
 # Print the selected ETS model
 print(crude_fit$auto_crude_ets)
@@ -140,3 +143,18 @@ gg_tsresiduals(crude_fit)
 In context of white noise, in the case of the additive model and crude_fit, the significant values at lag 9 and lag 17 respectively suggest that there is some correlation or pattern present in the residuals at those specific lags.
 
 Therefore, based on the ACF plot, it can be concluded that the residuals in both models do not exhibit the characteristics of white noise. The presence of significant values in the ACF plot indicates some level of autocorrelation or dependency between the residuals at certain lags, suggesting that there are systematic patterns or information that the models have not fully captured.
+
+5.4 Comparison of ETS model to the simple models
+
+```{bash}
+combined_accuracy <- accuracy(crude_oil_fit) %>%
+  arrange(.model) %>%
+  select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE) %>%
+  bind_rows(
+    accuracy(add),
+    accuracy(crude_fit)
+  )
+combined_accuracy
+```
+
+Among the forecast models evaluated, the additive_ETS and auto_crude_ets models demonstrate significantly better performance compared to the Drift, Mean, Naive, and Seasonal Naive models. The additive_ETS model exhibits lower values for RMSE, MAE, MAPE, and MASE, indicating higher accuracy in predicting future values. Additionally, the model has a lower RMSSE value, suggesting a better fit to the data. While the ME is close to zero, indicating a minor bias in the forecasts, the MPE is negative, implying a slight underestimation of actual values on average. The ACF1 value of 0.169 suggests a weak positive correlation in the residuals at Lag 1. Similarly, the auto_crude_ets model shows favorable results with comparable accuracy metrics, a slightly lower ME, a higher MPE, and a slightly higher ACF1 value. Overall, the additive_ETS and auto_crude_ets models outperform the other models, making them more suitable choices for forecasting.
