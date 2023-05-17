@@ -27,7 +27,7 @@ https://www.eia.gov/todayinenergy/detail.php?id=55920#:~:text=Europe%20became%20
   
 
 
-### 1.Introduction  
+## 1.Introduction  
   
   
 Energy commodities play a pivotal role in the global economy, as they are essential for economic growth and development. They are required for transportation, manufacturing, heating, cooling, and many other critical activities that drive economic activity. 
@@ -45,7 +45,7 @@ In this study, we will analyze the impact of the war in Ukraine on US energy exp
         
     
     
-### 2. Time Series Graphics      
+## 2. Time Series Graphics      
   
 In this section of the report, we will be creating time series graphics using various techniques such as time plots, seasonal plots, seasonal subseries plots, and ACF(). These plots will provide insights into the different time series in the dataset and help us understand their characteristics, such as seasonality, trend, and cyclicity. We will also look for unusual observations and changing patterns over time and explore the differences between the series in terms of these features. Additionally, for this analysis, we have decided to focus on three specific time series: US exports of Natural Gas to OECD, US Exports of Crude Oil to OECD, and US exports of Petroleum products to OECD. We will create the same types of graphs for all of these time series, including time plots, seasonal plots, seasonal subseries plots, and ACF plots. These time series span the last ten years from 2013 to 2023. Through these analyses, we aim to gain insights into the seasonality, cyclicity, trend, unusual observations, changing patterns, and differences between these time series, and determine if any of the series resemble a white noise process. By analyzing these time series graphics, we can gain a better understanding of the data and identify any potential patterns or anomalies that may exist within it.  
   
@@ -449,7 +449,7 @@ The ACF plot for US exports of Petroleum Products to OECD indicates that there i
 Finally, based on the ACF plots of the US exports of natural gas, crude oil, and petroleum products to OECD, we can conclude that the time series do not appear to be white noise.     
   
   
-### 3. Time series decomposition   
+## 3. Time series decomposition   
   
 #### 3.1. Adjustments   
   
@@ -701,20 +701,20 @@ gg_tsresiduals(naive_nat_gas)
   
 Looking at the graphs we see that in cases of both methods the residuals seem to stay close to zero therefore implying that there is no correlation between the residuals and thus suggesting that the models are accurate in the predictions of the data.  
   
-### 5. Exponential smoothing. 
+## 5. Exponential smoothing. 
   
   
   In this section, we will focus on the analysis and forecasting of Crude oil and Natural gas exports, as we have decided not to consider petroleum products time series for our analysis. The exclusion of petroleum products was discussed earlier, and now we will explore the time series for natural gas and crude oil after applying the Box-Cox transformation.
 
 Furthermore, our analysis will specifically concentrate on the application of exponential smoothing and ETS (Error, Trend, Seasonality) models. These models are widely used in time series forecasting and provide valuable insights into the underlying patterns and trends of the data.
 
-####5.1 Considering best ETS model
+###5.1 Considering best ETS model
 
 ```{r setup, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
-knitr::opts_chunk$set(echo = TRUE)
 
 # Combine the transformed time series
 combined_data <- merge(crude_oil_bx, nat_gas_bx, by = "Date", all = TRUE)
+
 #plotting time series
 
 #Determining the ETS Model for Crude OIL
@@ -724,31 +724,31 @@ ggplot(combined_data, aes(x = Date)) +
   ylab("Amount (Transformed)") +
   ggtitle("Crude Oil and Natural Gas Exports") +
   scale_color_manual(values = c("Crude Oil" = "red", "Natural Gas" = "green"))
-
-
 ```
 
-The graph above displays the time series for natural gas and crude oil exports after applying the Box-Cox transformation. Upon examination, we can observe that the time series for crude oil exhibits a higher level of consistency compared to natural gas. This consistency suggests that the crude oil time series may provide more reliable and relevant insights for our analysis.
-
-It is worth mentioning that our analysis aims to investigate the changing reliance of OECD countries on Russian crude oil following the commencement of the conflict in Ukraine. Therefore, going forward, we will focus solely on the crude oil time series as it aligns more closely with the specific objectives of our analysis.
-
-Within this section, we will explore various techniques and methodologies, such as time series decomposition, selection of appropriate forecasting methods, and evaluation of forecast accuracy. The application of exponential smoothing and ETS models will enable us to gain a deeper understanding of the patterns and dynamics within the crude oil time series.
-
-```{r cars}
+The graph above displays the time series for natural gas and crude oil exports after applying the Box-Cox transformation. Upon examination, we can observe that the time series for crude oil exhibits a higher level of consistency compared to natural gas. This consistency suggests that the crude oil time series may provide more reliable and relevant insights for our analysis.  
+  
+It is worth mentioning that our analysis aims to investigate the changing reliance of OECD countries on Russian crude oil following the commencement of the conflict in Ukraine. Therefore, going forward, we will focus solely on the crude oil time series as it aligns more closely with the specific objectives of our analysis.  
+  
+Within this section, we will explore various techniques and methodologies, such as time series decomposition, selection of appropriate forecasting methods, and evaluation of forecast accuracy. The application of exponential smoothing and ETS models will enable us to gain a deeper understanding of the patterns and dynamics within the crude oil time series.  
+  
+```{r cars, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}}
 #determining best ETS model
-fit<- crude_oil_bx %>% 
+fit <- crude_oil_bx %>% 
   model(
-    additive=ETS(Total_Exports~error("A")+trend("A")+season("A")),
-    multiplicative = ETS(Total_Exports ~ error("M") + trend("M") + season("M")),
-    random1 = ETS(Total_Exports ~ error("M") + trend("A") + season("A")),
+    additive_ETS=ETS(Total_Exports~error("A")+trend("A")+season("A")),
+    multiplicative_ETS = ETS(Total_Exports ~ error("M") + trend("M") + season("M")),
+    random1_ETS = ETS(Total_Exports ~ error("M") + trend("A") + season("A")),
   )
 
 #checking accuracy
 accuracy(fit) 
 
-addi_FC %>% 
+addi_fc<- fit %>% select(additive_ETS) %>% forecast(h=36)
+
+addi_fc %>% 
   autoplot(
-    crude_oil_agg) +
+    crude_oil_bx) +
   labs(
     y = "Thousand Barrels",
     title = "Forecasts for U.S. Crude oil exports to OECD Europe") +
@@ -767,19 +767,19 @@ Additionally, the additive model had a lower MAPE (Mean Absolute Percentage Erro
 
 Considering these metrics, the additive model demonstrated superior performance in terms of forecasting accuracy for the natural gas time series. Hence, we selected the additive model (ETS=AAA) as the most appropriate ETS model for our analysis.
 
-5.2 Applying ETS() function
+### 5.2 Applying ETS() function
 
-```{applying ETS formula}
+```{r applying, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #ETS model selection by R
-crude_fit <- crude_oil_agg %>%
+crude_fit <- crude_oil_bx %>%
   model(auto_crude_ets = ETS(Total_Exports))
 #checking the accuracy
 report(crude_fit)
 # Print the selected ETS model
 print(crude_fit$auto_crude_ets)
-auto_crud%>% 
-  autoplot(
-    crude_oil_agg) +
+
+crude_fit$auto_crude_ets %>% 
+  autoplot(crude_oil_bx) +
   labs(
     y = "Thousand Barrels",
     title = "Forecasts for U.S. Crude oil exports to OECD Europe") +
@@ -799,9 +799,9 @@ This indicates that the two approaches resulted in different model selections. T
 
 5.3 Checking the resuduals
 
-```{bash}
+```{r bash, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #Plotting Residual
-gg_tsresiduals(add)
+gg_tsresiduals(addi_fc)
 gg_tsresiduals(crude_fit)
 ```
 
@@ -814,8 +814,55 @@ Yet to be started
 
 In this section, same as in the previous one, we will use crude oil exports time series
 
+### 6.1. Box-Jenkins methodology  
+  
 
-Yet to be started
+### Random walk
+
+The Box-Cox transformation was already applied to stabilize the variance in chapter [3.2. Transformations]. Other than that no transformations were applied on neither of time series.
+
+Following a definition of stanioarity provided by Rob J Hyndman and George Athanasopoulos in Forecasting: Principles and Practice (3rd ed) **("A stationary time series is one whose statistical properties do not depend on the time at which the series is observed")** it is obvious that our time series is non stationary since it has clear trend and some seasonality.
+
+We start by performing Unit Root test to identify which methods are suitable in our case
+```{r, Unit root test}
+
+crude_oil_bx %>% ACF(Total_Exports) %>% 
+  autoplot() + labs(title = "ACF after first order difference")
+
+# KPSS test
+
+crude_oil_bx  %>% 
+  features(Total_Exports, unitroot_kpss)
+
+#Testing for seasonal differencing
+
+crude_oil_bx %>% 
+  features(Total_Exports, unitroot_nsdiffs)
+
+```
+We see that data, as expected, needs differencing but no seasonal differencing will be applied since unitroot_nsdiffs test showed that there is no need of that. 
+
+```{r, first order difference}
+
+crude_oil_bx <- crude_oil_bx %>% 
+  mutate(diff_total_exports = difference(Total_Exports))
+
+
+crude_oil_bx  %>% 
+  features(diff_total_exports, unitroot_kpss)
+
+```
+After conducting first order difference we see that data is now stationary.
+
+```{r}
+
+crude_oil_bx %>% ACF(diff_total_exports) %>% 
+  autoplot() + labs(title = "ACF of stationar crude oil exports")
+
+crude_oil_bx %>% PACF(diff_total_exports) %>% 
+  autoplot() + labs(title = "PACF of stationar crude oil exports ")
+```
+
 
 ## 7. Other forecasting methods
 
