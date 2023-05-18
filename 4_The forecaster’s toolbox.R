@@ -36,6 +36,11 @@ crude_oil_fc %>%
 
 ########################### Oil Porducts Exports ################################
 
+crude_oil_bx %>% 
+  features(Diff_total_exports, ljung_box, lag = 10)
+
+crude_oil_bx %>% 
+  features(Total_Exports, unitroot_nsdiffs)
 
 #fiting the models
 

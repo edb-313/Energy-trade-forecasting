@@ -59,7 +59,7 @@ In this section, we will analyze three datasets that pertain to US exports of Cr
   
    
        
-```{r, data_prep, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
+```{r, data_prep, echo=FALSE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 library(fpp3)
 library(tidyverse)
 library(ggplot2)
