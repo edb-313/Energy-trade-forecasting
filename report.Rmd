@@ -278,6 +278,34 @@ oecd_merged <- left_join(oecd_nat_gas_agg, oecd_oil_prod_agg, by = "Date") %>%
 total_exp_oecd <- oecd_merged %>%
   pivot_longer(cols = -Date, names_to = "Export type", values_to = "Amount")
 
+#Reliance on Russian gas
+
+raw_rel_rusoil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Monthly_Reliance_on_Russian_Oil.csv", skip = 1)
+
+colnames(raw_rel_rusoil)
+
+rel_rusoil <- raw_rel_rusoil %>% 
+  pivot_longer(cols = -...1,
+               names_to = 'Date',
+               values_to = 'Total Oil Imports from Russia / Total Oil Imports (%)')
+
+rel_rusoil <- rel_rusoil %>% 
+  rename(Country = ...1) %>% 
+  mutate(Date = lubridate::dmy(Date)) %>% 
+  select("Date","Country","Total Oil Imports from Russia / Total Oil Imports (%)")
+
+
+ts_rel_rusoil <- rel_rusoil %>% 
+  as_tsibble(
+    index = Date,
+    key = Country)
+
+
+oecd_relrus <- ts_rel_rusoil %>%
+  filter(Country == "OECD Europe")
+oecd_relrus
+
+
 ```
 **Comment on Nat Gas export zeros**
   
@@ -726,6 +754,8 @@ fit <- crude_oil_bx %>%
 
 #checking accuracy
 accuracy(fit) 
+report(fit)
+additive_ets<-fit %>% select(additive_ETS)
 
 addi_fc<- fit %>% select(additive_ETS) %>% forecast(h=36)
 
@@ -744,38 +774,85 @@ After carefully examining the graph of the crude oil time series, which displaye
 We developed three ETS models: additive (ETS=AAA), multiplicative (ETS=MMM), and random1 (ETS=MAA). These models incorporate different combinations of error, trend, and seasonality components to capture various patterns and dynamics within the data.
 After comparing the forecasting accuracy of the three ETS models (additive, multiplicative, and random), we observed that the additive model (ETS=AAA) outperformed the others in several metrics.
 
-For the training dataset, the additive model had a lower RMSE (Root Mean Squared Error) of 4.51 compared to 5.12 for the multiplicative model and 4.78 for the random model. The MAE (Mean Absolute Error) was also lower for the additive model (3.52) compared to the multiplicative model (3.99) and random model (3.65).
+For the training dataset, the additive model had the lowest ME (Mean Error) of -0.036, suggesting that it has a relatively small average difference between its predictions and the actual values. Also ACF1 only of 0.11, which suggests that the residuals are reasonably independent and do not exhibit strong patterns or dependencies.
 
-Additionally, the additive model had a lower MAPE (Mean Absolute Percentage Error) of 7.37% compared to 8.32% for the multiplicative model. The MASE (Mean Absolute Scaled Error) value for the additive model (0.415) was lower than that of the multiplicative model (0.470), indicating better forecasting accuracy.
+Additionally, the additive model had the lowest AICc, AIS and BIC compared to two other models, indicating that it provides a better balance between model complexity and goodness of fit. The lower values of AICc, AIC, and BIC suggest that the additive model outperforms the other models in terms of explaining the data while considering the number of parameters. This implies that the additive model is a more parsimonious choice and provides a better fit to the observed data, making it a preferred option for this analysis.
 
 Considering these metrics, the additive model demonstrated superior performance in terms of forecasting accuracy for the natural gas time series. Hence, we selected the additive model (ETS=AAA) as the most appropriate ETS model for our analysis.
 
 ### 5.2 Applying ETS() function
 
 ```{r applying, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
+#ETS model selection by R
+crude_fit <- crude_oil_bx %>%
+  model(auto_crude_ets = ETS(Total_Exports))
+#checking the accuracy
+report(crude_fit)
+report(additive_ets)
+accuracy(crude_fit)
+accuracy(additive_ets)
+
+
+auto_crude_ets<-crude_fit %>% select(auto_crude_ets)
+auto_crud<-auto_crude_ets %>% forecast(h=36)
+
+auto_crud%>% 
+  autoplot(
+    crude_oil_bx) +
+  labs(
+    y = "Thousand Barrels",
+    title = "Forecasts for U.S. Crude oil exports to OECD Europe") +
+  guides(colour = guide_legend(title = "Forecast"))
+
+
+
 
 ```
 
-After applying the ETS() function to choose an appropriate model for the crude oil time series, we obtained the selected ETS model as <ETS(A,Ad,N)>. To assess the accuracy of the selected model, we calculated various metrics using the accuracy() function. The results indicate that the chosen model performs reasonably well in terms of forecasting accuracy. The ME (Mean Error) is close to zero, indicating that, on average, the model's forecasts are unbiased. The RMSE (Root Mean Squared Error) is 4.70, which represents the average magnitude of the forecast errors. The MAE (Mean Absolute Error) is 3.64, which measures the average absolute difference between the model's forecasts and the actual values. The MPE (Mean Percentage Error) is -1.33%, indicating a slight underestimation of the crude oil exports. The MAPE (Mean Absolute Percentage Error) is 7.87%, providing a measure of the relative forecasting accuracy. The MASE (Mean Absolute Scaled Error) is 0.430, suggesting that the model's forecasts outperform a naive seasonal method. The RMSSE (Root Mean Squared Scaled Error) is 0.464, which compares the model's performance to that of a naïve random walk model. Finally, the ACF1 (Autocorrelation of Forecast Errors) is 0.183, representing the correlation between successive forecast errors. Overall, the selected ETS model demonstrates satisfactory accuracy, aligning with the main features observed in the crude oil time series.
+After applying the ETS() function to choose an appropriate model for the crude oil time series, we obtained the selected ETS model as <ETS(A,A,N)>. To assess the accuracy of the selected model, we calculated various metrics using the accuracy() function. The results indicate that the chosen model performs reasonably well in terms of forecasting accuracy. The ME (Mean Error) is close to zero, indicating that, on average, the model's forecasts are unbiased. The ME of the model is -0.037 which is relatively small. Also, the ACF1 (Autocorrelation of Forecast Errors) is 0.129, representing the correlation between successive forecast errors. Finally, AIC, AICc and BIC criterias are also small comapred to previous models, which indicated that model is better fit in this case. Overall, the selected ETS model demonstrates satisfactory accuracy, aligning with the main features observed in the crude oil time series.
 
 When comparing the two models, one which was selected by us and another by ETS() function, we can see that they do not coincide.
 The additive model (ETS(A,A,A)) selected based on main features has certain parameters and characteristics, such as smoothing parameters and initial states. Its information criteria values (AIC, AICc, and BIC) are higher compared to the auto_crude_ets model.
 
-In contrast, the auto_crude_ets model (ETS(A,Ad,N)) chosen through information criteria has different parameters and characteristics, including smoothing parameters and initial states. Its information criteria values are lower than those of the additive model.
+In contrast, the auto_crude_ets model (ETS(A,A,N)) chosen through information criteria has different parameters and characteristics, including smoothing parameters and initial states. Its information criteria values are lower than those of the additive model.
 
 This indicates that the two approaches resulted in different model selections. The main features approach emphasizes the structure of the data, while the information criteria approach prioritizes model simplicity and goodness-of-fit. Therefore, the models chosen based on main features and information criteria do not align in this case.
 
 
-5.3 Checking the resuduals
 
-```{r bash, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
+5.3 Checking the residuals
+
+```{r Checking residual of ETS models, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #Plotting Residual
+gg_tsresiduals(additive_ets)
+gg_tsresiduals(auto_crude_ets)
+
+
 ```
 
-In context of white noise, in the case of the additive model and crude_fit, the significant values at lag 9 and lag 17 respectively suggest that there is some correlation or pattern present in the residuals at those specific lags.
+In context of white noise, in the case of the additive_ets model and auto_crude_ets, the significant values at lag 12 and lag 15 respectively suggest that there is some correlation or pattern present in the residuals at those specific lags.
 
 Therefore, based on the ACF plot, it can be concluded that the residuals in both models do not exhibit the characteristics of white noise. The presence of significant values in the ACF plot indicates some level of autocorrelation or dependency between the residuals at certain lags, suggesting that there are systematic patterns or information that the models have not fully captured.
-Yet to be started
+
+
+5.4 Comparison of ETS model against simple models
+```{r Comparison of ETS model against simple models}
+accuracy(crude_oil_fit) %>% 
+  arrange(.model) %>% 
+  select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE)
+accuracy(additive_ets)
+accuracy(auto_crude_ets)
+
+combined_accuracy <- accuracy(crude_oil_fit) %>%
+  arrange(.model) %>%
+  select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE) %>%
+  bind_rows(
+    accuracy(additive_ets),
+    accuracy(auto_crude_ets)
+  )
+combined_accuracy
+```
+In conclusion, when comparing our ETS models to the simple models from the Toolbox chapter, we consistently observe superior performance by the ETS models across all accuracy measures. This highlights the significant enhancement in accuracy achieved through the Exponential Smoothing approach. The ETS models consistently outperform the simple models, affirming the effectiveness and value of employing Exponential Smoothing techniques in forecasting.
 
 ## 6. ARIMA
 
