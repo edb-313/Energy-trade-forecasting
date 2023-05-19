@@ -170,29 +170,6 @@ oecd_oil_prod_agg <- oecd_oil_prod %>%
   summarize_at(vars(`Amount of total Petroleum Porducts (Thousand Barrels)`), sum) %>%
   ungroup()
 
-################################################################################
-#Reliance on Russian gas
-
-raw_rel_rusoil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Monthly_Reliance_on_Russian_Oil.csv", skip = 1)
-
-rel_rusoil <- raw_rel_rusoil %>% 
-  pivot_longer(cols = -...1,
-               names_to = 'Date',
-               values_to = 'Total Oil Imports from Russia / Total Oil Imports (%)')
-
-rel_rusoil <- rel_rusoil %>% 
-  rename(Country = ...1) %>% 
-  mutate(Date = lubridate::dmy(Date)) %>% 
-  select("Date","Country","Total Oil Imports from Russia / Total Oil Imports (%)")
-
-
-ts_rel_rusoil <- rel_rusoil %>% 
-  as_tsibble(
-    index = Date,
-    key = Country)
-
-oecd_relrus <- ts_rel_rusoil %>%
-  filter(Country %in% oecd_europe)
 
 ################################################################################
 #Total Natural Gas Exports by Destination
@@ -278,6 +255,7 @@ oecd_merged <- left_join(oecd_nat_gas_agg, oecd_oil_prod_agg, by = "Date") %>%
 total_exp_oecd <- oecd_merged %>%
   pivot_longer(cols = -Date, names_to = "Export type", values_to = "Amount")
 
+
 #Reliance on Russian gas
 
 raw_rel_rusoil <- read_csv("https://raw.githubusercontent.com/edb-313/Energy-trade-forecasting/main/Data/csv/Monthly_Reliance_on_Russian_Oil.csv", skip = 1)
@@ -295,7 +273,7 @@ rel_rusoil <- rel_rusoil %>%
   select("Date","Country","Total Oil Imports from Russia / Total Oil Imports (%)")
 
 rel_rusoil <- rel_rusoil %>% 
-  mutate(`Total Oil Imports from Russia / Total Oil Imports (%)` = gsub("%", "", `Total Oil Imports from Russia / Total Oil Imports (%)`)) %>% 
+  mutate(`Total Oil Imports from Russia / Total Oil Imports (%)` = gsub("%", "", `Total Oil Imports from Russia / Total Oil Imports (%)`)) %>% mutate(Date = yearmonth(Date)) %>% 
   select(Date, Country, `Total Oil Imports from Russia / Total Oil Imports (%)`)
 
 ts_rel_rusoil <- rel_rusoil %>% 
@@ -305,8 +283,13 @@ ts_rel_rusoil <- rel_rusoil %>%
 
 
 oecd_relrus <- ts_rel_rusoil %>%
-  filter(Country == "OECD Europe")
-oecd_relrus
+  filter(Country == "OECD Europe") %>%
+  mutate(`Total Oil Imports from Russia / Total Oil Imports (%)` = as.numeric(`Total Oil Imports from Russia / Total Oil Imports (%)`))  %>% 
+  drop_na(Date) %>% drop_na(`Total Oil Imports from Russia / Total Oil Imports (%)`)
+  
+
+
+
 
 
 ```
@@ -717,7 +700,6 @@ Looking at the graphs we see that in cases of both methods the residuals seem to
   
 ## 5. Exponential smoothing. 
   
-  
   In this section, we will focus on the analysis and forecasting of Crude oil and Natural gas exports, as we have decided not to consider petroleum products time series for our analysis. The exclusion of petroleum products was discussed earlier, and now we will explore the time series for natural gas and crude oil after applying the Box-Cox transformation.
 
 Furthermore, our analysis will specifically concentrate on the application of exponential smoothing and ETS (Error, Trend, Seasonality) models. These models are widely used in time series forecasting and provide valuable insights into the underlying patterns and trends of the data.
@@ -744,9 +726,9 @@ The graph above displays the time series for natural gas and crude oil exports a
   
 It is worth mentioning that our analysis aims to investigate the changing reliance of OECD countries on Russian crude oil following the commencement of the conflict in Ukraine. Therefore, going forward, we will focus solely on the crude oil time series as it aligns more closely with the specific objectives of our analysis.  
   
-Within this section, we will explore various techniques and methodologies, such as time series decomposition, selection of appropriate forecasting methods, and evaluation of forecast accuracy. The application of exponential smoothing and ETS models will enable us to gain a deeper understanding of the patterns and dynamics within the crude oil time series.  
+Within this section, we will explore various techniques and methodologies, such as selection of appropriate forecasting methods, and evaluation of forecast accuracy. The application of exponential smoothing and ETS models will enable us to gain a deeper understanding of the patterns and dynamics within the crude oil time series.  
   
-```{r cars, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
+```{r Determing ETS model for Crude Oil exports, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #determining best ETS model
 fit <- crude_oil_bx %>% 
   model(
@@ -770,11 +752,7 @@ addi_fc %>%
     title = "Forecasts for U.S. Crude oil exports to OECD Europe") +
   guides(colour = guide_legend(title = "Forecast"))
 
-ggplot(oecd_relrus, aes(x = Date)) +
-  geom_line(aes(y = "Total Oil Imports from Russia / Total Oil Imports (%)")) +
-  ylab("Percentage") +
-  ggtitle("Reliance on Russia") 
-oecd_relrus
+
 ```
 
 
@@ -787,20 +765,16 @@ For the training dataset, the additive model had the lowest ME (Mean Error) of -
 
 Additionally, the additive model had the lowest AICc, AIS and BIC compared to two other models, indicating that it provides a better balance between model complexity and goodness of fit. The lower values of AICc, AIC, and BIC suggest that the additive model outperforms the other models in terms of explaining the data while considering the number of parameters. This implies that the additive model is a more parsimonious choice and provides a better fit to the observed data, making it a preferred option for this analysis.
 
-Considering these metrics, the additive model demonstrated superior performance in terms of forecasting accuracy for the natural gas time series. Hence, we selected the additive model (ETS=AAA) as the most appropriate ETS model for our analysis.
+Considering these metrics, the additive model demonstrated superior performance in terms of forecasting accuracy for the natural gas time series. Hence, we selected the additive model (ETS=AAA) as the most appropriate ETS model for our analysis. Ultimately, upon plotting the forecast, it becomes evident that the additive model predicts a continuation of the upward trend in exports.
 
 ### 5.2 Applying ETS() function
 
-```{r applying, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
+```{r applying ETS(), echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 #ETS model selection by R
 crude_fit <- crude_oil_bx %>%
   model(auto_crude_ets = ETS(Total_Exports))
-#checking the accuracy
-report(crude_fit)
-report(additive_ets)
-accuracy(crude_fit)
-accuracy(additive_ets)
 
+accuracy(crude_fit)
 
 auto_crude_ets<-crude_fit %>% select(auto_crude_ets)
 auto_crud<-auto_crude_ets %>% forecast(h=36)
@@ -818,7 +792,17 @@ auto_crud%>%
 
 ```
 
-After applying the ETS() function to choose an appropriate model for the crude oil time series, we obtained the selected ETS model as <ETS(A,A,N)>. To assess the accuracy of the selected model, we calculated various metrics using the accuracy() function. The results indicate that the chosen model performs reasonably well in terms of forecasting accuracy. The ME (Mean Error) is close to zero, indicating that, on average, the model's forecasts are unbiased. The ME of the model is -0.037 which is relatively small. Also, the ACF1 (Autocorrelation of Forecast Errors) is 0.129, representing the correlation between successive forecast errors. Finally, AIC, AICc and BIC criterias are also small comapred to previous models, which indicated that model is better fit in this case. Overall, the selected ETS model demonstrates satisfactory accuracy, aligning with the main features observed in the crude oil time series.
+After applying the ETS() function to choose an appropriate model for the crude oil time series, we obtained the selected ETS model as <ETS(A,A,N)>. To assess the accuracy of the selected model, we calculated various metrics using the accuracy() function. The results indicate that the chosen model performs reasonably well in terms of forecasting accuracy. The ME (Mean Error) is close to zero, indicating that, on average, the model's forecasts are unbiased. The ME of the model is -0.037 which is relatively small. Also, the ACF1 (Autocorrelation of Forecast Errors) is 0.129, representing the correlation between successive forecast errors. Finally, AIC, AICc and BIC cafeterias are also small indicating that model is a good fit in this case. Overall, the selected ETS model demonstrates satisfactory accuracy, aligning with the main features observed in the crude oil time series.
+
+```{r  comparison of ETS models}
+#checking the accuracy
+report(crude_fit)
+report(additive_ets)
+accuracy(crude_fit)
+accuracy(additive_ets)
+
+```
+
 
 When comparing the two models, one which was selected by us and another by ETS() function, we can see that they do not coincide.
 The additive model (ETS(A,A,A)) selected based on main features has certain parameters and characteristics, such as smoothing parameters and initial states. Its information criteria values (AIC, AICc, and BIC) are higher compared to the auto_crude_ets model.
@@ -828,6 +812,31 @@ In contrast, the auto_crude_ets model (ETS(A,A,N)) chosen through information cr
 This indicates that the two approaches resulted in different model selections. The main features approach emphasizes the structure of the data, while the information criteria approach prioritizes model simplicity and goodness-of-fit. Therefore, the models chosen based on main features and information criteria do not align in this case.
 
 
+Now, let's delve into another time series and examine the data pertaining to the reliance of OECD Europe countries on Russian crude oil exports. The goal for this overview is to check if our expectations to see opposite trend here compared to the US exports are correct. By analyzing this data, we will examine the autocorrelation function (ACF) to ensure that there is no presence of white noise. Additionally, we will utilize the ETS() function to generate a forecast, which we will then compare to the exports from the United States.
+```{r  Overview of Reliance of OECD Europe on RUssian Crude Oil}
+autoplot(oecd_relrus)
+ACF(oecd_relrus) %>% autoplot()
+```
+Despite the relatively short time series period of only two years, the impact of the Russian invasion in Ukraine is evident in the graph, showcasing a significant decline in the reliance of OECD Europe countries on Russian crude oil. Additionally, after inspecting ACF graph, we can conclude that time series does not appear to be White Noise. Given this observation and the current situation, it is anticipated that this downward trend will likely persist in the future. Although the time series data exhibits some negative trends and errors, there is no apparent seasonality. Therefore, for this particular time series, we have chosen the ETS (M,A,N) model, taking into account the absence of seasonality and aiming to capture the underlying patterns and fluctuations.
+
+```{r  Forecast for reliance}
+relrus_fit <- oecd_relrus %>% 
+  model(
+    relrus_ETS=ETS(`Total Oil Imports from Russia / Total Oil Imports (%)`~error("M")+trend("A")+season("N")))
+#checking the accuracy
+accuracy(relrus_fit)
+
+#plotting the forecast
+auto_relrus<-relrus_fit %>% forecast(h=12)
+auto_relrus%>% 
+  autoplot(oecd_relrus) +
+  labs(    y = "% of reliance",
+  title = "Reliance on Russian Crude Oil of OECD Europe") +
+  guides(colour = guide_legend(title = "Forecast"))
+```
+Upon applying the ETS model to the reliance time series, we observe a satisfactory level of accuracy, as indicated by the low MA and ACF1 values. Subsequently, we generated a forecast for the upcoming year, revealing that according to our model, the reliance is expected to continue decreasing. However, it is important to note that this forecast is based solely on two years of data, which may limit its accuracy and reliability.
+
+Upon examining the forecast presented in this chapter, it becomes evident that in response to the Russian invasion, OECD Europe significantly reduced its reliance on Russian crude oil and began increasing imports from the United States. Our forecast indicates that this trend of decreased reliance on Russian oil and increased imports from the US is expected to persist in the future.
 
 5.3 Checking the residuals
 
@@ -835,13 +844,12 @@ This indicates that the two approaches resulted in different model selections. T
 #Plotting Residual
 gg_tsresiduals(additive_ets)
 gg_tsresiduals(auto_crude_ets)
+gg_tsresiduals(relrus_fit)
 
 
 ```
 
-In context of white noise, in the case of the additive_ets model and auto_crude_ets, the significant values at lag 12 and lag 15 respectively suggest that there is some correlation or pattern present in the residuals at those specific lags.
-
-Therefore, based on the ACF plot, it can be concluded that the residuals in both models do not exhibit the characteristics of white noise. The presence of significant values in the ACF plot indicates some level of autocorrelation or dependency between the residuals at certain lags, suggesting that there are systematic patterns or information that the models have not fully captured.
+After checking the residuals of our selected ETS model for Crude oil exports and Reliance on Russian crude oil as well as the one selected automatically by R for exports, we can see that in all cases residual are normally distributed around zero which implies that there is no correlation between the residuals and thus suggesting that the models are accurate in the predictions of the data.  
 
 
 5.4 Comparison of ETS model against simple models
