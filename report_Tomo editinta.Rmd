@@ -914,17 +914,17 @@ crude_oil_bx <- crude_oil_bx %>%
 
 crude_oil_bx  %>% 
   features(diff_total_exports, unitroot_kpss)
+crude_oil_bx %>% autoplot(diff_total_exports)
 
 ```
 After conducting first order difference we see that data is now stationary.
 
 ```{r}
 
-crude_oil_bx %>% ACF(diff_total_exports) %>% 
-  autoplot() + labs(title = "ACF of stationar crude oil exports")
+crude_oil_bx %>%gg_tsdisplay(diff_total_exports, plot_type = "partial")
 
-crude_oil_bx %>% PACF(diff_total_exports) %>% 
-  autoplot() + labs(title = "PACF of stationar crude oil exports ")
+
+
 ```
 
 
