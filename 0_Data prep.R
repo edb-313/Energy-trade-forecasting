@@ -6,6 +6,7 @@ library(tidyr)
 library(lubridate)
 ################################################################################
 
+
 #Total Crude Oil Exports by Destination
 
 
@@ -134,10 +135,11 @@ ts_rel_rusoil <- rel_rusoil %>%
     index = Date,
     key = Country)
 
-oecd_relrus <- ts_rel_rusoil %>%
-  filter(Country %in% oecd_europe)
 
-oecd_relrus %>% slice_sample(n=10)
+oecd_relrus <- ts_rel_rusoil %>%
+  filter(Country == "OECD Europe")
+oecd_relrus
+
 
 ################################################################################
 #Total Natural Gas Exports by Destination
