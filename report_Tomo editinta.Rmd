@@ -854,11 +854,6 @@ After checking the residuals of our selected ETS model for Crude oil exports and
 
 5.4 Comparison of ETS model against simple models
 ```{r Comparison of ETS model against simple models}
-accuracy(crude_oil_fit) %>% 
-  arrange(.model) %>% 
-  select(.model, .type, RMSE, MAE, MAPE, MASE, RMSSE)
-accuracy(additive_ets)
-accuracy(auto_crude_ets)
 
 combined_accuracy <- accuracy(crude_oil_fit) %>%
   arrange(.model) %>%
