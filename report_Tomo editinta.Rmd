@@ -706,7 +706,7 @@ Furthermore, our analysis will specifically concentrate on the application of ex
 
 ###5.1 Considering best ETS model
 
-```{r setup ETS, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
+```{r setup ETS, echo=FALSE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 # Combine the transformed time series
 combined_data <- merge(crude_oil_bx, nat_gas_bx, by = "Date", all = TRUE)
@@ -794,12 +794,19 @@ auto_crud%>%
 
 After applying the ETS() function to choose an appropriate model for the crude oil time series, we obtained the selected ETS model as <ETS(A,A,N)>. To assess the accuracy of the selected model, we calculated various metrics using the accuracy() function. The results indicate that the chosen model performs reasonably well in terms of forecasting accuracy. The ME (Mean Error) is close to zero, indicating that, on average, the model's forecasts are unbiased. The ME of the model is -0.037 which is relatively small. Also, the ACF1 (Autocorrelation of Forecast Errors) is 0.129, representing the correlation between successive forecast errors. Finally, AIC, AICc and BIC cafeterias are also small indicating that model is a good fit in this case. Overall, the selected ETS model demonstrates satisfactory accuracy, aligning with the main features observed in the crude oil time series.
 
-```{r  comparison of ETS models}
+```{r  comparison of ETS models, echo=FALSE}
 #checking the accuracy
 report(crude_fit)
+
 report(additive_ets)
-accuracy(crude_fit)
-accuracy(additive_ets)
+
+
+combined_accuracy1 <- 
+  bind_rows(
+    accuracy(additive_ets),
+    accuracy(auto_crude_ets)
+  )
+combined_accuracy1
 
 ```
 
@@ -813,9 +820,10 @@ This indicates that the two approaches resulted in different model selections. T
 
 
 Now, let's delve into another time series and examine the data pertaining to the reliance of OECD Europe countries on Russian crude oil exports. The goal for this overview is to check if our expectations to see opposite trend here compared to the US exports are correct. By analyzing this data, we will examine the autocorrelation function (ACF) to ensure that there is no presence of white noise. Additionally, we will utilize the ETS() function to generate a forecast, which we will then compare to the exports from the United States.
-```{r  Overview of Reliance of OECD Europe on RUssian Crude Oil}
-autoplot(oecd_relrus)
-ACF(oecd_relrus) %>% autoplot()
+```{r  Overview of Reliance of OECD Europe on RUssian Crude Oil, echo=FALSE}
+autoplot(oecd_relrus) + labs(title = "Reliance on Russian Crude Oil of OECD Europe")
+
+ACF(oecd_relrus) %>% autoplot()+ labs(title = " ACF of Reliance on Russian Crude Oil of OECD Europe")
 ```
 Despite the relatively short time series period of only two years, the impact of the Russian invasion in Ukraine is evident in the graph, showcasing a significant decline in the reliance of OECD Europe countries on Russian crude oil. Additionally, after inspecting ACF graph, we can conclude that time series does not appear to be White Noise. Given this observation and the current situation, it is anticipated that this downward trend will likely persist in the future. Although the time series data exhibits some negative trends and errors, there is no apparent seasonality. Therefore, for this particular time series, we have chosen the ETS (M,A,N) model, taking into account the absence of seasonality and aiming to capture the underlying patterns and fluctuations.
 
@@ -840,7 +848,7 @@ Upon examining the forecast presented in this chapter, it becomes evident that i
 
 5.3 Checking the residuals
 
-```{r Checking residual of ETS models, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
+```{r Checking residual of ETS models, echo=FALSE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray',echo=FALSE}
 #Plotting Residual
 gg_tsresiduals(additive_ets)
 gg_tsresiduals(auto_crude_ets)
@@ -853,7 +861,7 @@ After checking the residuals of our selected ETS model for Crude oil exports and
 
 
 5.4 Comparison of ETS model against simple models
-```{r Comparison of ETS model against simple models}
+```{r Comparison of ETS model against simple models, echo=FALSE}
 
 combined_accuracy <- accuracy(crude_oil_fit) %>%
   arrange(.model) %>%
