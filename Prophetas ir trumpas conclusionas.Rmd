@@ -1,0 +1,58 @@
+---
+title: "prophet ir trumpas conclusionas"
+output: html_document
+date: "2023-05-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+library(fable.prophet)
+
+
+train <- crude_oil_bx %>%
+  filter(year(Date) <= 2021)
+
+
+fit <- train %>%
+  model(
+    arima = ARIMA(Total_Exports),
+    ets = ETS(Total_Exports),
+    additive_ETS=ETS(Total_Exports~error("A")+trend("A")+season("A")),
+    prophet = prophet(Total_Exports~season(period=12,order=1,type="additive"))
+  )
+
+accuracy(fit)
+
+fc <- fit %>%  forecast(h = 23)
+
+
+fc %>% 
+  autoplot(
+    crude_oil_bx,
+    level = NULL) +
+  labs(
+    y = "Amount of natural gas (BOE)",
+    title = "Forecasts for U.S. Natural gas exports to OECD Europe") +
+  guides(colour = guide_legend(title = "Forecast"))
+
+
+
+
+```
+The Prophet model has been selected with the following inputs:
+
+    Period: 12 (indicating yearly seasonality)
+    Order: 1 (considering the previous time point)
+    Type: Additive (consistent magnitude of seasonality)
+
+These inputs allow the model to capture the yearly seasonality in the data, incorporate the autoregressive nature of the series, and generate accurate forecasts by combining the trend and seasonal components.
+
+After evaluating the accuracy of the models, it is evident that all models perform relatively similarly in terms of accuracy. However, there is a noticeable difference in the forecasted growth of crude oil exports. The Prophet Model, while providing a slightly more pessimistic forecast, predicts a lower growth rate compared to the ARIMA and ETS models. This suggests that the Prophet Model takes a more cautious approach in estimating the future growth of crude oil exports.
+
+
+Conclusion
+
+In conclusion, this report compared the performance of ETS, ARIMA, and Prophet models with simple forecasting methods like Seasonal Naive and Drift. The analysis revealed that the advanced models, ETS, ARIMA, and Prophet, consistently outperformed the simple methods in terms of accuracy. These models captured the underlying patterns, seasonality, and trends in the crude oil export data more effectively. Additionally, the report highlighted the impact of geopolitical events, such as Russia's invasion of Ukraine, on the shifting export trends. Considering these findings, we believe that the observed trend in exports will likely continue in the future. 
