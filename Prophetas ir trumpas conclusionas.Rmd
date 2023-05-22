@@ -1,14 +1,10 @@
 ---
 title: "prophet ir trumpas conclusionas"
 output:
-  pdf_document: Energy Trade Forecast
   html_document: default
+  pdf_document: Energy Trade Forecast
 date: "2023-05-21"
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ```{r  Other forecasting models: Prophet, echo = FALSE}
 library(fable.prophet)
