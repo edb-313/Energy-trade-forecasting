@@ -1,6 +1,8 @@
 ---
 title: "prophet ir trumpas conclusionas"
-output: html_document
+output:
+  pdf_document: Energy Trade Forecast
+  html_document: default
 date: "2023-05-21"
 ---
 
@@ -8,7 +10,7 @@ date: "2023-05-21"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
+```{r  Other forecasting models: Prophet, echo = FALSE}
 library(fable.prophet)
 
 
@@ -38,7 +40,7 @@ fc %>%
     title = "Forecasts for U.S. Natural gas exports to OECD Europe") +
   guides(colour = guide_legend(title = "Forecast"))
 
-
+```
 
 
 ```
