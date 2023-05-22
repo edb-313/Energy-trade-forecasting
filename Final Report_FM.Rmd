@@ -41,24 +41,19 @@ In this study, we will analyze the impact of the war in Ukraine on US energy exp
 \linebreak  
 \linebreak     
 ## 2. Time Series Graphics      
-  
+\linebreak     
 In this section of the report, we will be creating time series graphics using various techniques such as time plots, seasonal plots, seasonal subseries plots, and ACF(). These plots will provide insights into the different time series in the dataset and help us understand their characteristics, such as seasonality, trend, and cyclicity. We will also look for unusual observations and changing patterns over time and explore the differences between the series in terms of these features. Additionally, for this analysis, we have decided to focus on three specific time series: US exports of Natural Gas to OECD, US Exports of Crude Oil to OECD, and US exports of Petroleum products to OECD. We will create the same types of graphs for all of these time series, including time plots, seasonal plots, seasonal subseries plots, and ACF plots. These time series span the last ten years from 2013 to 2023. Through these analyses, we aim to gain insights into the seasonality, cyclicity, trend, unusual observations, changing patterns, and differences between these time series, and determine if any of the series resemble a white noise process. By analyzing these time series graphics, we can gain a better understanding of the data and identify any potential patterns or anomalies that may exist within it.  
-  
-  
-  
+\linebreak     
+\linebreak     
 ### 2.1 Dataset  
-  
-  
+\linebreak     
 The data sets utilized in this study consist of monthly observations of Country’s reliance on Russian oil products, USA’s natural gas exports by country, USA’s total crude oil exports by destination, and USA’s petroleum products exports by destination.  
-  
+\linebreak     
 Our primary source of data is the U.S. Energy Information Administration (EIA), an independent organization that collects, analyzes, and disseminates data and information related to energy production, consumption, and distribution in the United States. Also, for the purpose of this study we are using data from the International Energy Agency (IEA), which  is an intergovernmental organization that was established in 1974 to promote global cooperation on energy issues.   
-  
+\linebreak     
 In case of data on reliance on Russian Oil the dataset contains monthly total oil imports from Russia as a percentage of total oil imports for a selected group of European countries belonging to the Organization for Economic Co-operation and Development (OECD) from January 1990 to October 2022. The dataset includes the date, country name, and the percentage of total oil imports that came from Russia for each observation.   
-  
+\linebreak     
 In this section, we will analyze three datasets that pertain to US exports of Crude oil, Petroleum Products, and Natural Gas, all measured in barrels. Prior to converting the data to tsibble format, we performed data cleaning and formatting. To simplify the data, we converted each dataset to have the same structure, with three columns: date, destination country, and the amount exported. After standardizing the format, we converted each dataset to tsibble format. We then filtered the data to only include countries that are part of the OECD and summarized the results based on the amount exported on each date, removing country names and leaving only the date and amount exported. Finally, we merged all three tsibble tables into one by using the left join function and pivoting the data, resulting in a final time series that represents US exports of the three different products in barrels to OECD countries. The tsibble contains three columns: Date, Export Type, and Amount.  
-  
-   
-       
 ```{r, data_prep, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 library(fpp3)
 library(tidyverse)
@@ -293,16 +288,17 @@ oecd_relrus <- ts_rel_rusoil %>%
 
 
 ```
-**Comment on Nat Gas export zeros**
-  
+\linebreak     
+\linebreak     
 ### 2.2 Time Series Plots   
-  
+\linebreak     
 Firstly, we will examine a general overview of the three products: US exports of Crude Oil, Petroleum Products, and Natural Gas to OECD countries in barrels over the last ten years. This analysis will provide us with an understanding of the overall trend and magnitude of the exports. By examining the trend, we can identify any significant changes in the exports over the years and evaluate the magnitude to determine which product has the highest export value. This overview will be a crucial step before we dive deeper into the individual time series of each product.  
-  
+\linebreak 
+\linebreak     
 ### 2.3 Including Plots   
-  
+\linebreak     
 The graph below reveals significant growth in Crude oil and Natural gas exports since around 2015, with a clear year-on-year increase in both goods, indicating a noticeable trend. Moreover, it appears that the time series for these two products are non-stationary, possibly suggesting the presence of a trend, seasonality, or both. In 2022/2023, Crude oil and Natural gas exports reached their peak, with crude oil almost 60,000 and natural gas around 40,000. Conversely, the time series for Petroleum products appears to be stationary, with a slight increasing trend that may require further analysis.  
-  
+\linebreak     
 ```{r,Times series overivew, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 total_exp_oecd %>% ggplot(
@@ -316,16 +312,13 @@ total_exp_oecd %>% ggplot(
   
 
 ```
-  
-    
+\linebreak     
 In the graph below, we have plotted each exported product separately to provide a better picture of each time series. The data shows that crude oil exports began in 2016 with lower amounts initially, but within a few years, exports boomed. Since 2016, there has been a significant positive trend, possibly with seasonality. In 2020, crude oil exports reached a peak of around 50,000 barrels. Then, due to the COVID-19 pandemic, exports decreased for two years. However, in the beginning of 2022, exports increased significantly, most likely due to the Russian invasion in Ukraine. Currently, exports of crude oil are at a peak, reaching almost 60,000 barrels.  
-  
-      
+\linebreak     
 Looking at natural gas exports, we can see that the US did not export to OECD countries until after 2016, when low amounts of natural gas were first exported. In 2018, exports increased significantly, reaching their first peak in 2020. We can see a similar positive trend and possible seasonality as in the crude oil graph. During the COVID-19 pandemic, exports decreased significantly, but again, after the Russian invasion, exports increased significantly, reaching 40,000 barrels. This suggests that OECD countries stopped buying natural gas from Russia.  
-  
+\linebreak     
 Finally, looking at petroleum product exports, we can see some fluctuations since 2010, but no clear trend. Seasonality may exist. The changes during COVID-19 and after the Russian invasion were not as significant as in the other two graphs.  
-  
-    
+\linebreak     
 ```{r, overview by product, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray'}
 
 total_exp_oecd %>%  
@@ -336,6 +329,9 @@ total_exp_oecd %>%
   facet_wrap(~`Export type`, ncol = 1)
 
 ```
+\linebreak     
+\linebreak     
+
 #### 2.4 Time Series Patterns  
   
 ```{r, Seasonal plot for each product, echo=TRUE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background='#F7F7F7'}
@@ -890,7 +886,7 @@ The Box-Cox transformation was already applied to stabilize the variance in chap
 Following a definition of stanioarity provided by Rob J Hyndman and George Athanasopoulos in Forecasting: Principles and Practice (3rd ed) *("A stationary time series is one whose statistical properties do not depend on the time at which the series is observed")* it is obvious that our time series is non stationary since it has clear trend and some seasonality.
 
 We start by performing Unit Root test to identify which methods are suitable in our case
-```{r, Unit root test}
+```{r, Unit root test, echo=FALSE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray',echo=FALSE}
 
 crude_oil_bx %>% ACF(Total_Exports) %>% 
   autoplot() + labs(title = "ACF after first order difference")
@@ -908,7 +904,7 @@ crude_oil_bx %>%
 ```
 We see that data, as expected, needs differencing but no seasonal differencing will be applied since unitroot_nsdiffs test showed that there is no need of that. 
 
-```{r, first order difference}
+```{r, first order difference,echo=FALSE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray',echo=FALSE}
 
 crude_oil_bx <- crude_oil_bx %>% 
   mutate(diff_total_exports = difference(Total_Exports))
@@ -921,7 +917,7 @@ crude_oil_bx %>% autoplot(diff_total_exports)
 ```
 After conducting first order difference we see that data is now stationary.
 
-```{r}
+```{r stationarity, echo=FALSE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray',echo=FALSE}
 
 library(ggplot2)
 library(dplyr)
@@ -934,7 +930,7 @@ crude_oil_bx %>%gg_tsdisplay(diff_total_exports, plot_type = "partial")
 
 
 ```
-```{r}
+```{r, ARIMA estimation, echo=FALSE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray',echo=FALSE}
 
 # Estimate ARIMA models
 model_1 <- arima(crude_oil_bx$diff_total_exports, order = c(1, 0, 0))
@@ -947,7 +943,7 @@ checkresiduals(model_2)
 checkresiduals(model_3)
 ```
 
-```{r}
+```{r, comparison of ARIMA,echo=FALSE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray',echo=FALSE}
 # Compare models using information criteria
 aic <- AIC(model_1, model_2, model_3)
 bic <- BIC(model_1, model_2, model_3)
@@ -955,3 +951,49 @@ bic <- BIC(model_1, model_2, model_3)
 ```
 
 ## 7. Other forecasting methods
+
+
+The Prophet model has been selected with the following inputs:
+
+    Period: 12 (indicating yearly seasonality)
+    Order: 1 (considering the previous time point)
+    Type: Additive (consistent magnitude of seasonality)
+
+These inputs allow the model to capture the yearly seasonality in the data, incorporate the autoregressive nature of the series, and generate accurate forecasts by combining the trend and seasonal components.
+
+```{r, prophet, echo=FALSE, results='markup',warning=FALSE,message=FALSE, fig.align='center', background= 'gray',echo=FALSE}
+library(fable.prophet)
+
+
+train_pr <- crude_oil_bx %>%
+  filter(year(Date) <= 2021)
+
+
+fit <- train_pr %>%
+  model(
+    arima = ARIMA(Total_Exports),
+    ets = ETS(Total_Exports),
+    additive_ETS=ETS(Total_Exports~error("A")+trend("A")+season("A")),
+    prophet = prophet(Total_Exports~season(period=12,order=1,type="additive"))
+  )
+
+accuracy(fit)
+
+fc <- fit %>%  forecast(h = 23)
+
+
+fc %>% 
+  autoplot(
+    crude_oil_bx,
+    level = NULL) +
+  labs(
+    y = "Amount of natural gas (BOE)",
+    title = "Forecasts for U.S. Natural gas exports to OECD Europe") +
+  guides(colour = guide_legend(title = "Forecast"))
+```
+
+After evaluating the accuracy of the models, it is evident that all models perform relatively similarly in terms of accuracy. However, there is a noticeable difference in the forecasted growth of crude oil exports. The Prophet Model, while providing a slightly more pessimistic forecast, predicts a lower growth rate compared to the ARIMA and ETS models. This suggests that the Prophet Model takes a more cautious approach in estimating the future growth of crude oil exports.
+
+## Conclusion
+
+In conclusion, this report compared the performance of ETS, ARIMA, and Prophet models with simple forecasting methods like Seasonal Naive and Drift. The analysis revealed that the advanced models, ETS, ARIMA, and Prophet, consistently outperformed the simple methods in terms of accuracy. These models captured the underlying patterns, seasonality, and trends in the crude oil export data more effectively. Additionally, the report highlighted the impact of geopolitical events, such as Russia's invasion of Ukraine, on the shifting export trends. Considering these findings, we believe that the observed trend in exports will likely continue in the future. 
